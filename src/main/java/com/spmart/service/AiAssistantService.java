@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.springframework.beans.factory.annotation.Value;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,15 +29,29 @@ public class AiAssistantService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
+    @Value("${spmart.ai.api-key:}")
+    private String aiApiKey;
+
+    @Value("${spmart.ai.model:gemini-1.5-flash}")
+    private String aiModel;
+
     public AiAssistantService(ProductRepository productRepository, CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+    }
+
+    public String getEngineModeDescription() {
+        if (aiApiKey != null && !aiApiKey.isBlank()) {
+            return "SP MART Generative AI Engine (" + aiModel + " + Live Catalogue Grounding)";
+        }
+        return "SP MART Rule-Based Catalogue Intelligence (Grounded Fallback)";
     }
 
     public AiResponseDto processChat(AiChatMessageDto request) {
         String query = request.getMessage() != null ? request.getMessage().trim() : "";
         if (query.isEmpty()) {
             AiResponseDto emptyResponse = new AiResponseDto("Hi! I'm your SP MART shopping assistant. Tell me your budget, preferred brand, or the device you're looking for.");
+            emptyResponse.setEngineMode(getEngineModeDescription());
             emptyResponse.setSuggestedPrompts(getDefaultPrompts());
             return emptyResponse;
         }
@@ -123,6 +138,7 @@ public class AiAssistantService {
         }
 
         reply.append("\n💡 *Need more details? Tap any card below to view full specifications, customer reviews, or add directly to your cart.*");
+        response.setEngineMode(getEngineModeDescription());
         response.setReply(reply.toString());
         response.setSuggestedPrompts(generateContextualPrompts(matchedProducts, detectedBrand, categoryId));
         return response;
@@ -205,6 +221,7 @@ public class AiAssistantService {
                         .append(prodA.getName()).append("** delivers premium specifications and build quality.");
             }
 
+            resp.setEngineMode(getEngineModeDescription());
             resp.setReply(sb.toString());
             resp.setSuggestedPrompts(List.of("Show accessories for " + prodA.getBrand(), "Filter under ₹50,000", "Top rated electronics"));
             return resp;
@@ -255,6 +272,7 @@ public class AiAssistantService {
 
         List<Product> products = productRepository.searchForAiAssistant(null, null, null, catId, null, PageRequest.of(0, 3));
         AiResponseDto resp = new AiResponseDto(explanation.toString());
+        resp.setEngineMode(getEngineModeDescription());
         resp.setProducts(products.stream().map(this::toCardDto).collect(Collectors.toList()));
         resp.setSuggestedPrompts(List.of("Best laptops under ₹70,000", "Top 55-inch 4K TVs", "Energy-saving ACs"));
         return resp;
