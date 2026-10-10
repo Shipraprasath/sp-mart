@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SP MART — Capstone Viva Presentation Slides</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #070B14;
+            --surface: rgba(15, 23, 42, 0.85);
+            --border: rgba(255, 255, 255, 0.12);
+            --cyan: #22D3EE;
+            --blue: #38BDF8;
+            --purple: #818CF8;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+        }
+
+        /* Ambient Glow Blobs */
+        .glow-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+        .blob-1 { width: 500px; height: 500px; background: #0284C7; top: -100px; left: -100px; }
+        .blob-2 { width: 600px; height: 600px; background: #4F46E5; bottom: -150px; right: -150px; }
+
+        /* Top Bar */
+        .top-bar {
+            position: relative;
+            z-index: 10;
+            padding: 1.25rem 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            background: rgba(7, 11, 20, 0.7);
+            backdrop-filter: blur(12px);
+        }
+
+        .brand {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: #FFFFFF;
+        }
+        .brand span { color: var(--cyan); }
+
+        .slide-indicator {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--cyan);
+            background: rgba(34, 211, 238, 0.1);
+            border: 1px solid rgba(34, 211, 238, 0.25);
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+        }
+
+        /* Slide Stage */
+        .slide-stage {
+            position: relative;
+            z-index: 5;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .slide-card {
+            display: none;
+            width: 100%;
+            max-width: 1100px;
+            height: calc(100vh - 180px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 3.5rem 4rem;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+            backdrop-filter: blur(24px);
+            overflow-y: auto;
+            animation: fadeInSlide 0.3s ease-out;
+        }
+
+        .slide-card.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        @keyframes fadeInSlide {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Slide Content Typography */
+        .slide-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+        }
+
+        .slide-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.15;
+            color: #FFFFFF;
+            margin-bottom: 1.75rem;
+            letter-spacing: -0.02em;
+        }
+        .slide-title .gradient {
+            background: linear-gradient(135deg, var(--cyan) 0%, var(--purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .slide-body {
+            font-size: 1.15rem;
+            line-height: 1.7;
+            color: #CBD5E1;
+        }
+
+        .slide-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1.1rem;
+            margin-top: 1rem;
+        }
+
+        .slide-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            font-size: 1.15rem;
+        }
+
+        .bullet {
+            color: var(--cyan);
+            font-weight: bold;
+            font-size: 1.25rem;
+            line-height: 1;
+        }
+
+        /* Grids & Cards in Slides */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+            margin-top: 1.5rem;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .info-card h4 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.2rem;
+            color: var(--cyan);
+            margin-bottom: 0.5rem;
+        }
+
+        .info-card p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Controls Bottom Bar */
+        .bottom-bar {
+            position: relative;
+            z-index: 10;
+            padding: 1rem 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            background: rgba(7, 11, 20, 0.7);
+            backdrop-filter: blur(12px);
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border);
+            color: #FFFFFF;
+            padding: 0.6rem 1.4rem;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-btn:hover {
+            background: rgba(34, 211, 238, 0.2);
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
+
+        .keyboard-hint {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .keyboard-hint kbd {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            padding: 0.15rem 0.4rem;
+        }
+
+        @media print {
+            @page {
+                size: 297mm 210mm landscape;
+                margin: 10mm;
+            }
+            body {
+                overflow: visible !important;
+                height: auto !important;
+                background: #070B14 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .glow-blob, .bottom-bar, .top-bar {
+                display: none !important;
+            }
+            .slide-stage {
+                display: block !important;
+                padding: 0 !important;
+            }
+            .slide-card {
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: center !important;
+                page-break-after: always !important;
+                break-after: page !important;
+                height: 190mm !important;
+                max-width: 100% !important;
+                border-radius: 12px !important;
+                border: 1px solid rgba(255, 255, 255, 0.2) !important;
+                box-shadow: none !important;
+                padding: 2rem 2.5rem !important;
+                margin-bottom: 20mm !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="glow-blob blob-1"></div>
+<div class="glow-blob blob-2"></div>
+
+<!-- Top Bar -->
+<div class="top-bar">
+    <div class="brand">
+        ⚡ SP<span>MART</span>
+    </div>
+    <div class="slide-indicator" id="slide-num">SLIDE 1 OF 12</div>
+    <div class="keyboard-hint">
+        Use <kbd>←</kbd> <kbd>→</kbd> Keys
+    </div>
+</div>
+
+<!-- Slide Presentation Stage -->
+<div class="slide-stage">
+
+    <!-- SLIDE 1 -->
+    <div class="slide-card active" data-title="Project Introduction">
+        <div class="slide-tag">B.Tech AI & Data Science Capstone Project</div>
+        <h1 class="slide-title">SP MART<br><span class="gradient">Premium Electronics E-Commerce</span></h1>
+        <p class="slide-body" style="font-size: 1.3rem; margin-bottom: 2rem;">
+            A Full-Stack Enterprise Commerce System with Catalog-Grounded Artificial Intelligence Architecture & Progressive Web App Mobility.
+        </p>
+        <div class="grid-3">
+            <div class="info-card">
+                <h4>☕ Backend Core</h4>
+                <p>Java 21 LTS · Spring Boot 3.3.4 · Spring Security 6 · Spring Data JPA</p>
+            </div>
+            <div class="info-card">
+                <h4>🤖 Grounded AI</h4>
+                <p>Natural Language Budget Extraction & Zero-Hallucination Spec Comparisons</p>
+            </div>
+            <div class="info-card">
+                <h4>📱 Mobile PWA</h4>
+                <p>Instant Smartphone Download & Native Home Screen Launching</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 2 -->
+    <div class="slide-card" data-title="Problem Statement">
+        <div class="slide-tag">Motivation & Challenges</div>
+        <h2 class="slide-title">Problem Statement in <span class="gradient">Electronics Retail</span></h2>
+        <ul class="slide-list">
+            <li>
+                <span class="bullet">✕</span>
+                <div>
+                    <strong>AI Hallucination Gap:</strong> Generic chat bots invent non-existent specifications and recommend out-of-stock electronics because they lack relational inventory grounding.
+                </div>
+            </li>
+            <li>
+                <span class="bullet">✕</span>
+                <div>
+                    <strong>Security & Privilege Bleed:</strong> Monolithic systems frequently fail to enforce strict boundaries between merchant fulfillment and administrative governance.
+                </div>
+            </li>
+            <li>
+                <span class="bullet">✕</span>
+                <div>
+                    <strong>Friction in Mobile Access:</strong> Native apps require high Play Store review friction, while traditional mobile websites lack offline caching and installability.
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- SLIDE 3 -->
+    <div class="slide-card" data-title="Proposed Solution">
+        <div class="slide-tag">Architecture Overview</div>
+        <h2 class="slide-title">The SP MART <span class="gradient">Architectural Solution</span></h2>
+        <div class="grid-2">
+            <div class="info-card">
+                <h4>1. Catalog-Grounded AI Assistant</h4>
+                <p>Extracts budget numbers (e.g. ₹30,000, 75k) and target devices, querying active JPA database records directly to ensure 100% verified responses.</p>
+            </div>
+            <div class="info-card">
+                <h4>2. Multi-Role RBAC Governance</h4>
+                <p>Strict vertical privilege separation across Customers (<code>ROLE_CUSTOMER</code>), Approved Merchants (<code>ROLE_SELLER</code>), and Admins (<code>ROLE_ADMIN</code>).</p>
+            </div>
+            <div class="info-card">
+                <h4>3. Progressive Web App (PWA)</h4>
+                <p>Provides a native Android and iOS mobile app install experience directly from the web browser via Service Worker and Web App Manifest.</p>
+            </div>
+            <div class="info-card">
+                <h4>4. Robust Enterprise Backend</h4>
+                <p>Layered architecture backed by 31 automated tests, BCrypt cryptographic password hashing, and cookie-based CSRF defense.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 4 -->
+    <div class="slide-card" data-title="System Architecture">
+        <div class="slide-tag">Multi-Tier Layered Architecture</div>
+        <h2 class="slide-title">Full-Stack <span class="gradient">Layered Architecture</span></h2>
+        <div class="info-card" style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; line-height: 1.6; white-space: pre; overflow-x: auto;">
+[ Presentation Layer ]  -->  Thymeleaf 3 + PWA Service Worker + Web Audio API
+          │
+          ▼
+[ Security Layer ]      -->  Spring Security 6 (BCrypt Factor 12 + Cookie CSRF)
+          │
+          ▼
+[ Controller Layer ]    -->  Spring MVC Controllers & RESTful AI Endpoints
+          │
+          ▼
+[ Service Layer ]       -->  Transactional Business Logic & Grounded AI Pipeline
+          │
+          ▼
+[ Data Access Layer ]   -->  Spring Data JPA Repositories + Hibernate ORM 6.5
+          │
+          ▼
+[ Persistence Tier ]    -->  Persistent H2 Storage / MySQL 8.0 Cloud Profile
+        </div>
+    </div>
+
+    <!-- SLIDE 5 -->
+    <div class="slide-card" data-title="AI Recommendation Engine">
+        <div class="slide-tag">Artificial Intelligence</div>
+        <h2 class="slide-title">Catalog-Grounded <span class="gradient">AI Pipeline</span></h2>
+        <ul class="slide-list">
+            <li>
+                <span class="bullet">✓</span>
+                <div>
+                    <strong>Intent Classification:</strong> Identifies budget discovery, device comparison, or hardware spec explanations.
+                </div>
+            </li>
+            <li>
+                <span class="bullet">✓</span>
+                <div>
+                    <strong>Deterministic Budget Parser:</strong> RegEx engine accurately normalizes units (k, thousand, lakh) and values (e.g. <code>₹30,000</code>).
+                </div>
+            </li>
+            <li>
+                <span class="bullet">✓</span>
+                <div>
+                    <strong>Side-by-Side Comparison Matrix:</strong> Analyzes two devices across Price, Rating, Battery, Display, and Camera, generating a contextual verdict.
+                </div>
+            </li>
+            <li>
+                <span class="bullet">✓</span>
+                <div>
+                    <strong>Interactive Card DTOs:</strong> Renders clickable thumbnail cards with instant navigation to details and cart.
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- SLIDE 6 -->
+    <div class="slide-card" data-title="Database Modeling">
+        <div class="slide-tag">Relational Persistence</div>
+        <h2 class="slide-title">15 Normalized <span class="gradient">Database Entities</span></h2>
+        <div class="grid-3">
+            <div class="info-card">
+                <h4>Identity Cluster</h4>
+                <p><code>users</code><br><code>seller_profiles</code><br><code>addresses</code><br><code>password_reset_tokens</code></p>
+            </div>
+            <div class="info-card">
+                <h4>Catalog Cluster</h4>
+                <p><code>categories</code> (12 Categories)<br><code>products</code> (Active Inventory)<br><code>reviews</code> (Verified Ratings)</p>
+            </div>
+            <div class="info-card">
+                <h4>Order Lifecycle</h4>
+                <p><code>customer_orders</code><br><code>order_items</code> (Immutable Snapshots)<br><code>order_status_histories</code><br><code>payments</code></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 7 -->
+    <div class="slide-card" data-title="Commerce & Payment Flow">
+        <div class="slide-tag">End-to-End Workflow</div>
+        <h2 class="slide-title">Cart, Checkout & <span class="gradient">Payment Sandbox</span></h2>
+        <ul class="slide-list">
+            <li>
+                <span class="bullet">⚡</span>
+                <div>
+                    <strong>Smart Delivery Tracker:</strong> Free Express Delivery progress bar unlocked on orders $\ge$ ₹500.
+                </div>
+            </li>
+            <li>
+                <span class="bullet">⚡</span>
+                <div>
+                    <strong>Payment Sandbox:</strong> Realistic testing of UPI QR & VPA, Google Pay, Paytm, Cards, and Cash on Delivery.
+                </div>
+            </li>
+            <li>
+                <span class="bullet">⚡</span>
+                <div>
+                    <strong>Web Audio API Chime:</strong> Synthesizes a celebratory two-tone audio chime on checkout completion with user mute options.
+                </div>
+            </li>
+            <li>
+                <span class="bullet">⚡</span>
+                <div>
+                    <strong>6-Stage Visual Stepper:</strong> Real-time shipment tracking with customer self-service cancellation before dispatch.
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- SLIDE 8 -->
+    <div class="slide-card" data-title="Multi-Role Portals">
+        <div class="slide-tag">Role-Based Governance</div>
+        <h2 class="slide-title">Seller & Administrator <span class="gradient">Back-Offices</span></h2>
+        <div class="grid-2">
+            <div class="info-card">
+                <h4>SaaS Seller Dashboard</h4>
+                <p>• Autonomous Product CRUD strictly isolated to vendor's catalog.<br>
+                   • 6 Live KPI Metrics: Revenue, Orders, Listings, Low-Stock (&le; 10).<br>
+                   • Milestone Shipment Updates (Processing → Shipped → Delivered).<br>
+                   • Administrator Approval Required (Counterfeit Protection).</p>
+            </div>
+            <div class="info-card">
+                <h4>Administrator Control Panel</h4>
+                <p>• Executive Platform Revenue & Order Volumes.<br>
+                   • Merchant Application Review Queue (Approve / Reject).<br>
+                   • Customer Review Moderation System.<br>
+                   • Global Catalog Overrides & Warehouse Restocking.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 9 -->
+    <div class="slide-card" data-title="Cybersecurity Design">
+        <div class="slide-tag">Information Security</div>
+        <h2 class="slide-title">Cybersecurity & <span class="gradient">Defense-in-Depth</span></h2>
+        <div class="grid-2">
+            <div class="info-card">
+                <h4>Cryptographic Storage</h4>
+                <p>Passwords hashed using <strong>BCrypt (strength factor 12)</strong> with per-user salt. Immune to rainbow tables.</p>
+            </div>
+            <div class="info-card">
+                <h4>CSRF Token Repository</h4>
+                <p>Configured with <code>CookieCsrfTokenRepository</code> and eager token pre-resolution to prevent response buffer commit crashes.</p>
+            </div>
+            <div class="info-card">
+                <h4>SQL Injection Prevention</h4>
+                <p>Zero dynamic concatenation. 100% strongly-typed parameter binding via Spring Data JPA and Hibernate ORM.</p>
+            </div>
+            <div class="info-card">
+                <h4>Session Fixation Defense</h4>
+                <p>Spring Security automatically issues fresh session IDs upon authentication, preventing session hijacking.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 10 -->
+    <div class="slide-card" data-title="Quality Assurance">
+        <div class="slide-tag">Verification & Validation</div>
+        <h2 class="slide-title">Testing Suite: <span class="gradient">31 / 31 Automated Tests Passed</span></h2>
+        <div class="info-card" style="margin-top: 1.5rem;">
+            <p style="font-size: 1.1rem; color: #10B981; font-weight: bold; margin-bottom: 0.75rem;">
+                ✓ BUILD SUCCESS: 100% Automated Test Coverage
+            </p>
+            <p>• <strong>SecurityIntegrationTest:</strong> Role guards & unauthenticated redirects (4/4 Passed)<br>
+               • <strong>ProductServiceTest:</strong> Catalog filters & stock headroom logic (4/4 Passed)<br>
+               • <strong>CartServiceTest:</strong> Quantity steppers & subtotal calculations (4/4 Passed)<br>
+               • <strong>OrderServiceTest:</strong> Atomic checkout transactions & state changes (4/4 Passed)<br>
+               • <strong>SellerServiceTest:</strong> Merchant status machine & privilege checks (4/4 Passed)<br>
+               • <strong>AiAssistantServiceTest:</strong> Budget parsing & comparison matrix (4/4 Passed)<br>
+               • <strong>UserServiceTest & AddressServiceTest:</strong> Registration & boundaries (7/7 Passed)</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 11 -->
+    <div class="slide-card" data-title="DevOps & Deployment">
+        <div class="slide-tag">PaaS & Mobility</div>
+        <h2 class="slide-title">Cloud Deployment & <span class="gradient">PWA Mobility</span></h2>
+        <div class="grid-2">
+            <div class="info-card">
+                <h4>Progressive Web App (PWA)</h4>
+                <p>• <code>manifest.json</code> + <code>sw.js</code> Service Worker.<br>
+                   • Prompts native <strong>"Install SP MART"</strong> button on mobile Chrome & Safari.<br>
+                   • Launches standalone full-screen like a Play Store app.</p>
+            </div>
+            <div class="info-card">
+                <h4>Railway Cloud Deployment</h4>
+                <p>• Connected with GitHub: <code>Shipraprasath/sp-mart</code>.<br>
+                   • Configured with <code>system.properties</code> (Java 21).<br>
+                   • Dynamic cloud port binding via <code>server.port=${PORT:8080}</code>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 12 -->
+    <div class="slide-card" data-title="Conclusion & Thank You">
+        <div class="slide-tag">Project Conclusion</div>
+        <h2 class="slide-title">Summary & <span class="gradient">Thank You</span></h2>
+        <p class="slide-body" style="font-size: 1.25rem; margin-bottom: 2rem;">
+            SP MART demonstrates that modern Java enterprise architectures can deliver blazing-fast, hallucination-free AI shopping experiences and seamless mobile app accessibility.
+        </p>
+        <div class="info-card" style="text-align: center; padding: 2rem;">
+            <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.6rem; color: #FFFFFF; margin-bottom: 0.5rem;">
+                Live Project Demonstration & Viva Q&A
+            </h3>
+            <p style="color: var(--cyan); font-family: 'JetBrains Mono', monospace;">
+                https://github.com/Shipraprasath/sp-mart
+            </p>
+        </div>
+    </div>
+
+</div>
+
+<!-- Bottom Navigation Bar -->
+<div class="bottom-bar">
+    <button type="button" class="nav-btn" id="prev-btn" onclick="prevSlide()">
+        ◀ Previous
+    </button>
+    <div style="display: flex; gap: 0.75rem;">
+        <button type="button" class="nav-btn" onclick="toggleFullScreen()">
+            ⛶ Fullscreen Presentation
+        </button>
+        <button type="button" class="nav-btn" onclick="window.print()" style="background: rgba(34, 211, 238, 0.15); border-color: var(--cyan); color: var(--cyan);">
+            🖨️ Export / Print Slides PDF
+        </button>
+    </div>
+    <button type="button" class="nav-btn" id="next-btn" onclick="nextSlide()">
+        Next ▶
+    </button>
+</div>
+
+<!-- Slide Controller Script -->
+<script>
+    const slides = document.querySelectorAll('.slide-card');
+    const slideIndicator = document.getElementById('slide-num');
+    let currentIndex = 0;
+
+    function showSlide(index) {
+        if (index < 0) index = 0;
+        if (index >= slides.length) index = slides.length - 1;
+        currentIndex = index;
+
+        slides.forEach((s, idx) => {
+            s.classList.toggle('active', idx === currentIndex);
+        });
+
+        slideIndicator.textContent = `SLIDE ${currentIndex + 1} OF ${slides.length}`;
+        document.getElementById('prev-btn').style.opacity = currentIndex === 0 ? '0.5' : '1';
+        document.getElementById('next-btn').style.opacity = currentIndex === slides.length - 1 ? '0.5' : '1';
+    }
+
+    function nextSlide() {
+        if (currentIndex < slides.length - 1) showSlide(currentIndex + 1);
+    }
+
+    function prevSlide() {
+        if (currentIndex > 0) showSlide(currentIndex - 1);
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') nextSlide();
+        if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+        if (e.key === 'Home') showSlide(0);
+        if (e.key === 'End') showSlide(slides.length - 1);
+    });
+
+    function toggleFullScreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
+    }
+
+    showSlide(0);
+</script>
+</body>
+</html>

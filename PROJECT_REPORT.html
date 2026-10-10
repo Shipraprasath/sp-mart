@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SP MART — Capstone Project Report (Print to PDF)</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0F172A;
+            --accent: #2563EB;
+            --accent-light: #EFF6FF;
+            --border: #CBD5E1;
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --code-bg: #F8FAFC;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            color: var(--text-main);
+            background-color: #E2E8F0;
+            line-height: 1.65;
+            font-size: 11pt;
+        }
+
+        /* Top Bar with Print Button */
+        .no-print-bar {
+            background: #0F172A;
+            color: #FFFFFF;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-print {
+            background: #2563EB;
+            color: #FFFFFF;
+            border: none;
+            padding: 0.65rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-print:hover {
+            background: #1D4ED8;
+            transform: translateY(-1px);
+        }
+
+        /* Paper Document Simulation */
+        .paper-page {
+            background: #FFFFFF;
+            width: 210mm;
+            min-height: 297mm;
+            margin: 2rem auto;
+            padding: 25mm 20mm;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+            position: relative;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4 {
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--primary);
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            line-height: 1.25;
+        }
+
+        h1 { font-size: 24pt; font-weight: 700; }
+        h2 { font-size: 16pt; font-weight: 700; border-bottom: 2px solid var(--accent); padding-bottom: 0.35rem; margin-top: 2rem; }
+        h3 { font-size: 13pt; font-weight: 600; margin-top: 1.25rem; }
+        p { margin-bottom: 0.85rem; text-align: justify; }
+
+        /* Cover Page */
+        .cover-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: center;
+            height: 247mm;
+        }
+
+        .cover-header { margin-top: 2rem; }
+        .cover-title {
+            font-size: 26pt;
+            color: var(--primary);
+            line-height: 1.2;
+            margin: 2rem 0 1rem 0;
+            text-transform: uppercase;
+        }
+
+        .cover-subtitle {
+            font-size: 13pt;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+
+        .cover-badge {
+            display: inline-block;
+            background: var(--accent-light);
+            color: var(--accent);
+            padding: 0.4rem 1rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 9pt;
+            margin-bottom: 2rem;
+            border: 1px solid #BFDBFE;
+        }
+
+        .cover-details-box {
+            background: #F8FAFC;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            text-align: left;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            font-size: 10pt;
+        }
+
+        .cover-footer {
+            font-size: 10pt;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.25rem 0;
+            font-size: 9.5pt;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.6rem 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: #F1F5F9;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) td {
+            background-color: #F8FAFC;
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8.5pt;
+            overflow-x: auto;
+            margin: 1rem 0;
+            line-height: 1.45;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8.5pt;
+            background: #F1F5F9;
+            padding: 0.15rem 0.35rem;
+            border-radius: 4px;
+        }
+
+        /* Diagrams & Callouts */
+        .diagram-box {
+            background: #F8FAFC;
+            border: 1.5px dashed var(--border);
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin: 1.25rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8.5pt;
+            line-height: 1.4;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        .callout {
+            background: var(--accent-light);
+            border-left: 4px solid var(--accent);
+            padding: 0.85rem 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 10pt;
+        }
+
+        /* Print Media Styles */
+        @media print {
+            body { background: transparent; }
+            .no-print-bar { display: none !important; }
+            .paper-page {
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding: 15mm 15mm !important;
+                width: 100% !important;
+                page-break-after: always;
+            }
+            .page-break { page-break-before: always; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- No-Print Action Header -->
+<div class="no-print-bar">
+    <div>
+        <strong>SP MART Technical Documentation</strong> — B.Tech AI & Data Science Capstone Project
+    </div>
+    <button type="button" class="btn-print" onclick="window.print()">
+        🖨️ Print to PDF / Save as PDF
+    </button>
+</div>
+
+<!-- ========================================================================= -->
+<!-- COVER PAGE                                                                -->
+<!-- ========================================================================= -->
+<div class="paper-page cover-page">
+    <div class="cover-header">
+        <p style="text-align: center; font-weight: 700; letter-spacing: 0.1em; color: var(--text-muted); font-size: 11pt;">
+            DEPARTMENT OF ARTIFICIAL INTELLIGENCE AND DATA SCIENCE
+        </p>
+        <p style="text-align: center; font-size: 9.5pt; color: var(--text-muted); margin-top: 0.25rem;">
+            CAPSTONE PROJECT TECHNICAL REPORT
+        </p>
+    </div>
+
+    <div>
+        <span class="cover-badge">ENTERPRISE FULL-STACK WEB APPLICATION</span>
+        <h1 class="cover-title">SP MART</h1>
+        <p class="cover-subtitle">
+            Premium Electronics E-Commerce Web Application with Catalog-Grounded Artificial Intelligence Architecture
+        </p>
+    </div>
+
+    <div class="cover-details-box">
+        <div>
+            <p><strong>Academic Program:</strong> B.Tech AI & Data Science</p>
+            <p><strong>Backend Architecture:</strong> Java 21 LTS · Spring Boot 3.3.4</p>
+            <p><strong>Security Framework:</strong> Spring Security 6 · BCrypt (Factor 12)</p>
+            <p><strong>Persistence:</strong> Spring Data JPA · Hibernate 6.5</p>
+        </div>
+        <div>
+            <p><strong>Database:</strong> Persistent H2 Engine + MySQL 8 Profile</p>
+            <p><strong>Mobile Framework:</strong> Progressive Web App (PWA)</p>
+            <p><strong>AI Recommendation Engine:</strong> Catalog-Grounded NLP Pipeline</p>
+            <p><strong>GitHub Repository:</strong> <a href="https://github.com/Shipraprasath/sp-mart" style="color: var(--accent);">Shipraprasath/sp-mart</a></p>
+        </div>
+    </div>
+
+    <div class="cover-footer">
+        <p style="text-align: center;">ACADEMIC YEAR 2025 – 2026</p>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- PAGE 2: TABLE OF CONTENTS & ABSTRACT                                      -->
+<!-- ========================================================================= -->
+<div class="paper-page">
+    <h2>1. Executive Summary & Abstract</h2>
+    <p>
+        <strong>SP MART</strong> is an enterprise-grade electronics e-commerce web application engineered to solve critical consumer electronics retail challenges: spec comprehension, decision fatigue, and data security. Built on <strong>Java 21 LTS</strong> and <strong>Spring Boot 3.3.4</strong>, the system implements an enterprise multi-tier layered architecture that enforces strict role-based privilege isolation across Buyers (<code>ROLE_CUSTOMER</code>), Verified Merchants (<code>ROLE_SELLER</code>), and System Administrators (<code>ROLE_ADMIN</code>).
+    </p>
+    <p>
+        A key scientific contribution of this capstone project is the <strong>Catalog-Grounded AI Shopping Assistant</strong>. Unlike generic LLM chat widgets that hallucinate non-existent hardware specifications or out-of-stock items, the SP MART AI engine uses deterministic NLP entity extractors and dynamic Spring Data JPA queries to ground all recommendation cards, budget filters, and side-by-side device comparisons directly in live relational database records.
+    </p>
+
+    <div class="callout">
+        <strong>Key Innovation:</strong> Zero-hallucination shopping intelligence achieved via deterministic relational grounding, paired with mobile Progressive Web App (PWA) installation and synthesized Web Audio milestone feedback.
+    </div>
+
+    <h2>2. Technology Stack Architecture</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Tier / Layer</th>
+                <th>Technology</th>
+                <th>Key Specifications & Version</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Backend Language</strong></td>
+                <td>Java 21 LTS</td>
+                <td>Virtual Threads (Project Loom), Record Patterns, Sealed Interfaces</td>
+            </tr>
+            <tr>
+                <td><strong>Enterprise Framework</strong></td>
+                <td>Spring Boot 3.3.4</td>
+                <td>Spring MVC, Embedded Tomcat 10, Dependency Injection</td>
+            </tr>
+            <tr>
+                <td><strong>Cybersecurity</strong></td>
+                <td>Spring Security 6.3.3</td>
+                <td>BCrypt (strength 12), Cookie-based CSRF, Session Fixation Defense</td>
+            </tr>
+            <tr>
+                <td><strong>Persistence & ORM</strong></td>
+                <td>Spring Data JPA & Hibernate 6.5</td>
+                <td>JPA 3.1, Transaction Management, Query Method Derivation</td>
+            </tr>
+            <tr>
+                <td><strong>Relational Database</strong></td>
+                <td>H2 Engine / MySQL 8.0</td>
+                <td>Persistent File Storage (<code>./data/spmartdb</code>) & Cloud MySQL Profile</td>
+            </tr>
+            <tr>
+                <td><strong>Templating & View</strong></td>
+                <td>Thymeleaf 3.1.2</td>
+                <td>HTML5 Server-Side Natural Templating, Security Dialect</td>
+            </tr>
+            <tr>
+                <td><strong>Mobile Architecture</strong></td>
+                <td>Progressive Web App (PWA)</td>
+                <td>Service Worker (<code>sw.js</code>), Web App Manifest (<code>manifest.json</code>)</td>
+            </tr>
+            <tr>
+                <td><strong>Quality Assurance</strong></td>
+                <td>JUnit 5 & Mockito</td>
+                <td>31 Automated Unit & Integration Tests (100% Pass)</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ========================================================================= -->
+<!-- PAGE 3: SYSTEM ARCHITECTURE & ER DIAGRAM                                  -->
+<!-- ========================================================================= -->
+<div class="paper-page">
+    <h2>3. System Architecture & Flow Model</h2>
+    <div class="diagram-box">
++-------------------------------------------------------------------------+
+|                         PRESENTATION LAYER                              |
+|   Thymeleaf 3 Templates | HTML5 | CSS3 Design Tokens | PWA Service Worker|
+|   Web Audio API Chime   | JavaScript ES6+ Async Fetch | Mobile Manifest |
++------------------------------------+------------------------------------+
+                                     | HTTP / HTTPS Request
+                                     v
++-------------------------------------------------------------------------+
+|                          SECURITY FILTER CHAIN                          |
+|   Spring Security 6 | CookieCsrfTokenRepository | BCryptPasswordEncoder |
+|   SessionManagement | Role-Based RequestMatchers | CustomUserDetails    |
++------------------------------------+------------------------------------+
+                                     | Authenticated Principal
+                                     v
++-------------------------------------------------------------------------+
+|                           CONTROLLER LAYER                              |
+|   HomeController       | ProductCatalogController | CartController      |
+|   CheckoutController   | AuthController           | OrderController     |
+|   SellerController     | AdminController          | AiAssistantController|
++------------------------------------+------------------------------------+
+                                     | DTOs / Method Invocations
+                                     v
++-------------------------------------------------------------------------+
+|                            SERVICE LAYER                                |
+|   ProductService       | CartService              | OrderService        |
+|   UserService          | SellerService            | ReviewService       |
+|   AiAssistantService   | PaymentService           | PasswordResetService|
++------------------------------------+------------------------------------+
+                                     | Domain Entities / Business Logic
+                                     v
++-------------------------------------------------------------------------+
+|                           DATA ACCESS LAYER                             |
+|   Spring Data JPA Repositories | Hibernate ORM 6.5 | EntityManager      |
++------------------------------------+------------------------------------+
+                                     | JDBC / SQL Statements
+                                     v
++-------------------------------------------------------------------------+
+|                           PERSISTENCE LAYER                             |
+|   Development: Persistent H2 Database (./data/spmartdb.mv.db)           |
+|   Production:  MySQL 8.0 Enterprise Database                            |
++-------------------------------------------------------------------------+
+    </div>
+
+    <h2>4. Relational Database Schema Design</h2>
+    <p>
+        The relational persistence tier comprises <strong>15 normalized database tables</strong>, organized into four primary functional clusters:
+    </p>
+    <table>
+        <thead>
+            <tr>
+                <th>Cluster</th>
+                <th>Tables</th>
+                <th>Business Purpose</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Identity & Roles</strong></td>
+                <td><code>users</code>, <code>seller_profiles</code>, <code>addresses</code>, <code>password_reset_tokens</code></td>
+                <td>Handles authentication, multi-role privileges, merchant business data, and address book.</td>
+            </tr>
+            <tr>
+                <td><strong>Catalog & Products</strong></td>
+                <td><code>categories</code>, <code>products</code>, <code>reviews</code></td>
+                <td>Maintains 12 electronics categories, specifications, pricing, discounts, and verified reviews.</td>
+            </tr>
+            <tr>
+                <td><strong>Shopping & Wishlist</strong></td>
+                <td><code>carts</code>, <code>cart_items</code>, <code>wishlist_items</code></td>
+                <td>Manages active cart state, quantity steppers, and buyer wishlist items.</td>
+            </tr>
+            <tr>
+                <td><strong>Order Lifecycle</strong></td>
+                <td><code>customer_orders</code>, <code>order_items</code>, <code>order_status_histories</code>, <code>payments</code></td>
+                <td>Maintains immutable purchase snapshots, 6-milestone shipment states, and payment records.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ========================================================================= -->
+<!-- PAGE 4: AI ARCHITECTURE & CODE IMPLEMENTATION                             -->
+<!-- ========================================================================= -->
+<div class="paper-page">
+    <h2>5. Catalog-Grounded AI Recommendation Architecture</h2>
+    <p>
+        The AI shopping engine is accessible via <code>POST /api/ai/assistant/chat</code>. It processes unstructured natural language queries and extracts budget thresholds, target brands, and comparison intents before executing dynamic database queries:
+    </p>
+
+    <h3>Natural Language Budget Parsing Algorithm</h3>
+    <pre>
+private BigDecimal extractBudget(String query) {
+    Pattern pattern = Pattern.compile(
+        "(?:under|below|less than|budget|within|upto|up to)\\s*(?:rs\\.?|inr|₹)?\\s*([0-9]+(?:,[0-9]+)*)(?:\\s*(k|thousand|lakh|lac))?", 
+        Pattern.CASE_INSENSITIVE
+    );
+    Matcher matcher = pattern.matcher(query);
+    if (matcher.find()) {
+        String numStr = matcher.group(1).replace(",", "");
+        String unit = matcher.group(2);
+        try {
+            double val = Double.parseDouble(numStr);
+            if (unit != null) {
+                unit = unit.toLowerCase();
+                if (unit.equals("k") || unit.startsWith("thous")) val *= 1000;
+                else if (unit.startsWith("lak") || unit.startsWith("lac")) val *= 100000;
+            } else if (val < 200) {
+                val *= 1000; // Normalizes shorthand e.g. "under 50" to 50,000
+            }
+            return BigDecimal.valueOf(val);
+        } catch (Exception ignored) {}
+    }
+    return null;
+}
+    </pre>
+
+    <h2>6. Multi-Role Modules & Core Features</h2>
+    <ul>
+        <li><strong>Buyer Portal:</strong> Split-screen authentication, 12 category browsing, dynamic ₹500 free delivery calculation, payment sandbox (UPI, Cards, Wallets, COD), 6-milestone order tracking, and self-service cancellation.</li>
+        <li><strong>Seller Back-Office:</strong> Merchant registration with GSTIN, administrator approval workflow, isolated inventory CRUD, low-stock alerts (&le; 10 units), and order shipment updates.</li>
+        <li><strong>Administrator Governance:</strong> Executive analytics dashboard, merchant approval queue, review moderation, and warehouse replenishment overrides.</li>
+    </ul>
+
+    <h2>7. Quality Assurance & Test Verification</h2>
+    <p>
+        A total of <strong>31 automated test cases</strong> were executed using JUnit 5, Mockito, and Spring Boot Test, achieving a <strong>100% pass rate</strong>:
+    </p>
+    <table>
+        <thead>
+            <tr>
+                <th>Test Suite</th>
+                <th>Scope</th>
+                <th>Test Cases</th>
+                <th>Result</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>SecurityIntegrationTest</code></td>
+                <td>URL role guards, unauthenticated redirects, CSRF enforcement</td>
+                <td>4</td>
+                <td><strong style="color: #10B981;">PASS (100%)</strong></td>
+            </tr>
+            <tr>
+                <td><code>ProductServiceTest</code></td>
+                <td>Catalog search, category filtering, stock headroom validation</td>
+                <td>4</td>
+                <td><strong style="color: #10B981;">PASS (100%)</strong></td>
+            </tr>
+            <tr>
+                <td><code>CartServiceTest</code></td>
+                <td>Item addition, quantity steppers, subtotal recalculation</td>
+                <td>4</td>
+                <td><strong style="color: #10B981;">PASS (100%)</strong></td>
+            </tr>
+            <tr>
+                <td><code>OrderServiceTest</code></td>
+                <td>Checkout transaction, stock decrements, tracking states</td>
+                <td>4</td>
+                <td><strong style="color: #10B981;">PASS (100%)</strong></td>
+            </tr>
+            <tr>
+                <td><code>SellerServiceTest</code></td>
+                <td>Merchant onboarding, approval state machine</td>
+                <td>4</td>
+                <td><strong style="color: #10B981;">PASS (100%)</strong></td>
+            </tr>
+            <tr>
+                <td><code>AiAssistantServiceTest</code></td>
+                <td>Budget regex parser, comparison matrix generation</td>
+                <td>4</td>
+                <td><strong style="color: #10B981;">PASS (100%)</strong></td>
+            </tr>
+            <tr>
+                <td><code>UserServiceTest</code></td>
+                <td>User creation, BCrypt password hashing, uniqueness checks</td>
+                <td>3</td>
+                <td><strong style="color: #10B981;">PASS (100%)</strong></td>
+            </tr>
+            <tr>
+                <td><code>AddressServiceTest</code></td>
+                <td>Address book CRUD, user boundary isolation</td>
+                <td>2</td>
+                <td><strong style="color: #10B981;">PASS (100%)</strong></td>
+            </tr>
+            <tr>
+                <td><code>PasswordResetServiceTest</code></td>
+                <td>Token creation, UUID cryptography, expiration checks</td>
+                <td>2</td>
+                <td><strong style="color: #10B981;">PASS (100%)</strong></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ========================================================================= -->
+<!-- PAGE 5: DEPLOYMENT & CONCLUSION                                           -->
+<!-- ========================================================================= -->
+<div class="paper-page">
+    <h2>8. Deployment Architecture & Progressive Web App (PWA)</h2>
+    <p>
+        The system implements modern Progressive Web App (PWA) standards via <code>/manifest.json</code> and <code>/sw.js</code>. When opened on mobile devices running Chrome or Safari, the application displays a native <strong>"Install SP MART App"</strong> prompt, installing directly to the home screen with full offline shell caching.
+    </p>
+    <p>
+        For production hosting, the project is configured for turnkey deployment on <strong>Railway PaaS</strong> with automatic dynamic port binding (<code>server.port=${PORT:8080}</code>) and Java 21 LTS runtime specification (<code>system.properties</code>).
+    </p>
+
+    <h2>9. Demonstration Credentials</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>User Role</th>
+                <th>Email Address</th>
+                <th>Password</th>
+                <th>Dashboard Destination</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Administrator</strong></td>
+                <td><code>admin@spmart.com</code></td>
+                <td><code>Admin@123</code></td>
+                <td><code>/admin/dashboard</code></td>
+            </tr>
+            <tr>
+                <td><strong>Approved Seller</strong></td>
+                <td><code>seller1@spmart.com</code></td>
+                <td><code>Seller@123</code></td>
+                <td><code>/seller/dashboard</code></td>
+            </tr>
+            <tr>
+                <td><strong>Customer (Buyer)</strong></td>
+                <td><code>buyer@spmart.com</code></td>
+                <td><code>Buyer@123</code></td>
+                <td><code>/account/profile</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>10. Conclusion & Academic Evaluation</h2>
+    <p>
+        SP MART demonstrates the successful design, implementation, and deployment of an enterprise electronics e-commerce web application. By integrating Java 21 LTS and Spring Boot 3 with catalog-grounded AI recommendations and Progressive Web App mobility, the project solves real-world retail challenges, achieving exceptional response times, zero AI hallucinations, and comprehensive multi-role data governance.
+    </p>
+
+    <div style="margin-top: 3rem; display: flex; justify-content: space-between; font-size: 10pt; color: var(--text-muted);">
+        <div>
+            <p>___________________________</p>
+            <p><strong>Candidate Signature</strong></p>
+        </div>
+        <div>
+            <p>___________________________</p>
+            <p><strong>Internal Project Guide</strong></p>
+        </div>
+        <div>
+            <p>___________________________</p>
+            <p><strong>Head of Department (AI & DS)</strong></p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
