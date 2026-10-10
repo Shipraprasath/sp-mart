@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin-layout :: admin-head('Manage Products')}"></head>
+<body>
+
+<div class="admin-layout">
+    <div th:replace="~{fragments/admin-layout :: sidebar('products')}"></div>
+
+    <main class="admin-main">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h1 style="font-size: 1.75rem;">Product Management</h1>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Create, edit, toggle visibility, and update pricing</p>
+            </div>
+            <a th:href="@{/admin/products/new}" class="btn btn-primary btn-sm">+ Add New Product</a>
+        </div>
+
+        <!-- Success Alert -->
+        <div th:if="${successMessage}" class="alert alert-success alert-auto-dismiss">
+            <span th:text="${successMessage}">Success message</span>
+        </div>
+
+        <div class="card-box" style="padding: 1rem 1.25rem; margin-bottom: 1.5rem;">
+            <form th:action="@{/admin/products}" method="get" style="display: flex; gap: 1rem; align-items: center;">
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="Search products by SKU, name, or brand..." class="form-control" style="max-width: 400px;">
+                <button type="submit" class="btn btn-primary btn-sm">Search</button>
+                <a th:href="@{/admin/products}" class="btn btn-outline btn-sm">Reset</a>
+            </form>
+        </div>
+
+        <div class="card-box" style="padding: 0; overflow: hidden;">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Product Name</th>
+                            <th>SKU</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="p : ${productPage.content}">
+                            <td style="width: 60px;">
+                                <img th:src="${p.mainImageUrl}" th:alt="${p.name}"
+                                     style="width: 44px; height: 44px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                            </td>
+                            <td>
+                                <strong style="color: var(--primary);" th:text="${p.name}">Product Name</strong><br>
+                                <span style="font-size: 0.75rem; color: var(--text-muted);" th:text="'Brand: ' + ${p.brand}">Brand</span>
+                            </td>
+                            <td><code th:text="${p.sku}">SKU</code></td>
+                            <td th:text="${p.category.name}">Category</td>
+                            <td>
+                                <strong th:text="'₹' + ${#numbers.formatDecimal(p.price, 1, 2)}">₹99.00</strong>
+                                <span th:if="${p.hasDiscount()}" style="display: block; font-size: 0.75rem; color: var(--accent);"
+                                      th:text="'Sale: ₹' + ${#numbers.formatDecimal(p.discountPrice, 1, 2)}"></span>
+                            </td>
+                            <td>
+                                <span th:if="${p.stock > 10}" class="badge badge-success" th:text="${p.stock}">15</span>
+                                <span th:if="${p.stock > 0 and p.stock <= 10}" class="badge badge-warning" th:text="${p.stock} + ' (Low)'">5</span>
+                                <span th:if="${p.stock == 0}" class="badge badge-danger">Out</span>
+                            </td>
+                            <td>
+                                <span th:if="${p.active}" class="badge badge-success">Active</span>
+                                <span th:unless="${p.active}" class="badge badge-secondary">Inactive</span>
+                            </td>
+                            <td style="text-align: right;">
+                                <div style="display: inline-flex; gap: 0.5rem;">
+                                    <a th:href="@{/admin/products/edit/{id}(id=${p.id})}" class="btn btn-outline btn-sm">Edit</a>
+                                    <form th:action="@{/admin/products/toggle/{id}(id=${p.id})}" method="post">
+                                        <button type="submit" class="btn btn-sm" th:classappend="${p.active ? 'btn-outline' : 'btn-primary'}"
+                                                th:text="${p.active ? 'Deactivate' : 'Activate'}">
+                                            Toggle
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div th:if="${productPage.totalPages > 1}" style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem;">
+            <a th:if="${productPage.hasPrevious()}" th:href="@{/admin/products(page=${productPage.number - 1}, keyword=${keyword})}" class="btn btn-outline btn-sm">← Previous</a>
+            <span style="display: flex; align-items: center; padding: 0 1rem; font-size: 0.85rem;" th:text="'Page ' + ${productPage.number + 1} + ' of ' + ${productPage.totalPages}">Page 1</span>
+            <a th:if="${productPage.hasNext()}" th:href="@{/admin/products(page=${productPage.number + 1}, keyword=${keyword})}" class="btn btn-outline btn-sm">Next →</a>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

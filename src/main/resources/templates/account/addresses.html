@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Manage Addresses')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: header-top}"></div>
+<header th:replace="~{fragments/layout :: header}"></header>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<main class="main-content">
+    <div class="container" style="padding-top: 2rem;">
+
+        <div style="display: flex; gap: 2.5rem; align-items: start;">
+
+            <!-- Account Sidebar Nav -->
+            <aside class="card-box" style="width: 250px; flex-shrink: 0;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">My Account</h3>
+                <nav style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem; font-weight: 600;">
+                    <a th:href="@{/account/profile}" style="color: var(--text-muted); padding: 0.4rem 0;">👤 Profile & Security</a>
+                    <a th:href="@{/account/orders}" style="color: var(--text-muted); padding: 0.4rem 0;">📦 Order History</a>
+                    <a th:href="@{/account/addresses}" style="color: var(--secondary); padding: 0.4rem 0;">📍 Saved Addresses</a>
+                    <a th:href="@{/wishlist}" style="color: var(--text-muted); padding: 0.4rem 0;">❤️ My Wishlist</a>
+                    <a th:href="@{/cart}" style="color: var(--text-muted); padding: 0.4rem 0;">🛒 Shopping Cart</a>
+                </nav>
+            </aside>
+
+            <!-- Address Management Cards -->
+            <div style="flex: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <div>
+                        <h1 style="font-size: 1.5rem;">Saved Delivery Addresses</h1>
+                        <p style="color: var(--text-muted); font-size: 0.875rem;">Manage your primary and alternate shipping locations</p>
+                    </div>
+                    <a th:href="@{/account/addresses/add}" class="btn btn-primary btn-sm">+ Add New Address</a>
+                </div>
+
+                <div th:if="${#lists.isEmpty(addresses)}" class="card-box" style="text-align: center; padding: 3rem;">
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">No saved addresses found. Add an address for rapid checkout.</p>
+                    <a th:href="@{/account/addresses/add}" class="btn btn-primary">Add Address Now</a>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(addresses)}" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem;">
+                    <div th:each="addr : ${addresses}" class="card-box" style="margin-bottom: 0; display: flex; flex-direction: column;">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem;">
+                            <strong style="font-size: 1.05rem; color: var(--primary);" th:text="${addr.recipientName}">Recipient Name</strong>
+                            <span th:if="${addr.isDefault()}" class="badge badge-success" style="font-size: 0.7rem;">Default</span>
+                        </div>
+
+                        <p style="color: var(--text-muted); font-size: 0.9rem; flex: 1; margin-bottom: 0.5rem;" th:text="${addr.formattedAddress}">
+                            Address details
+                        </p>
+
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+                            <strong>Phone:</strong> <span th:text="${addr.phone}">9876543210</span>
+                        </p>
+
+                        <div style="display: flex; gap: 0.5rem; align-items: center; border-top: 1px solid var(--border-color); padding-top: 0.75rem; font-size: 0.85rem;">
+                            <a th:href="@{/account/addresses/edit/{id}(id=${addr.id})}" class="btn btn-outline btn-sm" style="flex: 1;">Edit</a>
+
+                            <form th:unless="${addr.isDefault()}" th:action="@{/account/addresses/default/{id}(id=${addr.id})}" method="post" style="flex: 1;">
+                                <button type="submit" class="btn btn-outline btn-sm btn-block">Set Default</button>
+                            </form>
+
+                            <form th:action="@{/account/addresses/delete/{id}(id=${addr.id})}" method="post">
+                                <button type="submit" class="btn btn-outline btn-sm" style="color: var(--danger);" title="Delete" onclick="return confirm('Delete this address?')">✕</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Electronics Catalogue')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: header-top}"></div>
+<header th:replace="~{fragments/layout :: header}"></header>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<main class="main-content">
+    <div class="container" style="padding-top: 1.5rem; max-width: 1280px;">
+
+        <!-- Breadcrumbs & Header -->
+        <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h1 style="font-size: 1.85rem; font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: var(--primary);">Electronics Catalogue</h1>
+                <p style="color: var(--text-muted); font-size: 0.95rem;" th:text="'Showing ' + ${productPage.totalElements} + ' verified electronics'">Showing verified electronics</p>
+            </div>
+
+            <!-- Sort By Control -->
+            <form th:action="@{/products}" method="get" id="sortForm" style="display: flex; align-items: center; gap: 0.5rem;">
+                <input type="hidden" name="keyword" th:value="${keyword}" th:if="${keyword}">
+                <input type="hidden" name="category" th:value="${selectedCategory}" th:if="${selectedCategory}">
+                <input type="hidden" name="brand" th:value="${selectedBrand}" th:if="${selectedBrand}">
+                <input type="hidden" name="minPrice" th:value="${minPrice}" th:if="${minPrice}">
+                <input type="hidden" name="maxPrice" th:value="${maxPrice}" th:if="${maxPrice}">
+
+                <label for="sortBySelect" style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Sort By:</label>
+                <select id="sortBySelect" name="sortBy" class="form-control" style="width: auto; padding: 0.4rem 0.75rem;" onchange="this.form.submit()">
+                    <option value="newest" th:selected="${sortBy == 'newest'}">Newest Arrivals</option>
+                    <option value="price_asc" th:selected="${sortBy == 'price_asc'}">Price: Low to High</option>
+                    <option value="price_desc" th:selected="${sortBy == 'price_desc'}">Price: High to Low</option>
+                    <option value="rating" th:selected="${sortBy == 'rating'}">Customer Rating</option>
+                    <option value="name" th:selected="${sortBy == 'name'}">Product Name</option>
+                </select>
+            </form>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 260px 1fr; gap: 2rem; align-items: start;">
+
+            <!-- Filters Sidebar -->
+            <aside class="card-box" style="position: sticky; top: 100px; border-radius: var(--radius-md);">
+                <h3 style="font-size: 1.1rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; color: var(--primary);">
+                    Filter & Refine
+                </h3>
+
+                <form th:action="@{/products}" method="get">
+                    <!-- Search Keyword -->
+                    <div class="form-group" style="margin-bottom: 1.25rem;">
+                        <label class="form-label">Keyword</label>
+                        <input type="text" name="keyword" th:value="${keyword}" placeholder="Search phone, model, spec..." class="form-control">
+                    </div>
+
+                    <!-- Category Filter -->
+                    <div class="form-group" style="margin-bottom: 1.25rem;">
+                        <label class="form-label">Category</label>
+                        <select name="category" class="form-control">
+                            <option value="">All 12 Categories</option>
+                            <option th:each="cat : ${allCategories}"
+                                    th:value="${cat.id}"
+                                    th:text="${cat.name}"
+                                    th:selected="${selectedCategory == cat.id}">Category</option>
+                        </select>
+                    </div>
+
+                    <!-- Brand Filter -->
+                    <div class="form-group" style="margin-bottom: 1.25rem;">
+                        <label class="form-label">Brand</label>
+                        <select name="brand" class="form-control">
+                            <option value="">All Brands</option>
+                            <option th:each="b : ${brands}"
+                                    th:value="${b}"
+                                    th:text="${b}"
+                                    th:selected="${selectedBrand == b}">Brand</option>
+                        </select>
+                    </div>
+
+                    <!-- Price Range -->
+                    <div class="form-group" style="margin-bottom: 1.25rem;">
+                        <label class="form-label">Price Range (₹)</label>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <input type="number" step="100" min="0" name="minPrice" th:value="${minPrice}" placeholder="Min ₹" class="form-control">
+                            <span>-</span>
+                            <input type="number" step="100" min="0" name="maxPrice" th:value="${maxPrice}" placeholder="Max ₹" class="form-control">
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="sortBy" th:value="${sortBy}">
+
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
+                        <button type="submit" class="btn btn-primary btn-sm btn-block">Apply Filters</button>
+                        <a th:href="@{/products}" class="btn btn-outline btn-sm" title="Reset Filters">Reset</a>
+                    </div>
+                </form>
+            </aside>
+
+            <!-- Product Grid & Pagination -->
+            <div>
+                <!-- Empty Results State -->
+                <div th:if="${productPage.empty}" class="card-box" style="text-align: center; padding: 4rem 2rem; border-radius: var(--radius-lg);">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" style="margin: 0 auto 1rem auto;">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        <line x1="8" y1="11" x2="14" y2="11"></line>
+                    </svg>
+                    <h3 style="margin-bottom: 0.5rem; color: var(--primary);">No matching electronics found</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">We couldn't find any products matching your selected search criteria or price filters.</p>
+                    <a th:href="@{/products}" class="btn btn-primary">Clear Filters & View All</a>
+                </div>
+
+                <!-- Products Grid -->
+                <div th:unless="${productPage.empty}" class="product-grid" style="margin-top: 0;">
+                    <div th:each="p : ${productPage.content}" class="product-card">
+                        <!-- Wishlist button -->
+                        <form th:action="@{/wishlist/add/{id}(id=${p.id})}" method="post">
+                            <button type="submit" class="card-wishlist-btn" title="Save to Wishlist">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                            </button>
+                        </form>
+
+                        <span th:if="${p.hasDiscount()}" class="card-discount-badge" th:text="'-' + ${p.getDiscountPercentage()} + '%'">-15%</span>
+
+                        <a th:href="@{/products/{id}(id=${p.id})}" class="card-image-box">
+                            <img th:src="${p.mainImageUrl}" th:alt="${p.name}">
+                        </a>
+
+                        <div class="card-content">
+                            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                                <span class="card-brand" th:text="${p.brand}">Brand</span>
+                                <span th:if="${p.modelNumber}" style="font-size: 0.7rem; color: var(--text-muted);" th:text="${p.modelNumber}">Model</span>
+                            </div>
+
+                            <a th:href="@{/products/{id}(id=${p.id})}" class="card-title" th:text="${p.name}">Product Name</a>
+
+                            <div class="card-rating">
+                                <span style="color: #f59e0b;">★</span>
+                                <strong th:text="${p.averageRating}">4.8</strong>
+                                <span th:text="'(' + ${p.reviewCount} + ')'">(12)</span>
+                            </div>
+
+                            <div class="stock-tag">
+                                <span th:if="${p.stock > 10}" class="stock-in">● In Stock</span>
+                                <span th:if="${p.stock > 0 and p.stock <= 10}" class="stock-low" th:text="'● Only ' + ${p.stock} + ' left!'">● Low Stock</span>
+                                <span th:if="${p.stock == 0}" class="stock-out">● Out of Stock</span>
+                            </div>
+
+                            <div class="card-price-row">
+                                <span class="current-price" th:text="'₹' + ${#numbers.formatDecimal(p.getEffectivePrice(), 1, 2)}">₹999.00</span>
+                                <span th:if="${p.hasDiscount()}" class="original-price" th:text="'₹' + ${#numbers.formatDecimal(p.price, 1, 2)}">₹1,200.00</span>
+                            </div>
+
+                            <form th:action="@{/cart/add}" method="post" style="margin-top: 0.5rem;">
+                                <input type="hidden" name="productId" th:value="${p.id}">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="btn btn-primary btn-sm btn-block" th:disabled="${!p.isInStock()}">
+                                    <span th:text="${p.isInStock() ? 'Add to Cart' : 'Out of Stock'}">Add to Cart</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination Bar -->
+                <div th:if="${productPage.totalPages > 1}" style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 2.5rem;">
+                    <a th:if="${productPage.hasPrevious()}"
+                       th:href="@{/products(page=${productPage.number - 1}, keyword=${keyword}, category=${selectedCategory}, brand=${selectedBrand}, minPrice=${minPrice}, maxPrice=${maxPrice}, sortBy=${sortBy})}"
+                       class="btn btn-outline btn-sm">← Previous</a>
+
+                    <span style="display: flex; align-items: center; padding: 0 1rem; font-weight: 600; font-size: 0.9rem; color: var(--text-muted);"
+                          th:text="'Page ' + (${productPage.number} + 1) + ' of ' + ${productPage.totalPages}">Page 1 of 3</span>
+
+                    <a th:if="${productPage.hasNext()}"
+                       th:href="@{/products(page=${productPage.number + 1}, keyword=${keyword}, category=${selectedCategory}, brand=${selectedBrand}, minPrice=${minPrice}, maxPrice=${maxPrice}, sortBy=${sortBy})}"
+                       class="btn btn-outline btn-sm">Next →</a>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Order Confirmed')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: header-top}"></div>
+<header th:replace="~{fragments/layout :: header}"></header>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<main class="main-content">
+    <div class="container" style="max-width: 780px; padding-top: 2.5rem; padding-bottom: 3rem;">
+
+        <!-- Success Banner -->
+        <div id="order-confirmation-banner" class="card-box" style="text-align: center; padding: 3rem 2rem; border-top: 6px solid var(--accent); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); position: relative;">
+            
+            <!-- Sound Toggle Pill in Banner Header -->
+            <div style="position: absolute; top: 1rem; right: 1rem;">
+                <button type="button" id="sound-toggle-btn" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: var(--radius-full);">
+                    🔔 Mute Chime
+                </button>
+            </div>
+
+            <div style="width: 72px; height: 72px; background-color: #ecfdf5; color: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>
+
+            <h1 style="font-size: 2.25rem; font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem;">You're All Set!</h1>
+            <p style="color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 1.5rem; max-width: 540px; margin-left: auto; margin-right: auto;">
+                Your order has been placed successfully. Get ready to enjoy your new technology.
+            </p>
+
+            <div style="background-color: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem 1.75rem; display: inline-flex; align-items: center; gap: 1rem; margin-bottom: 1.75rem;">
+                <div style="text-align: left;">
+                    <span style="font-size: 0.75rem; color: var(--text-muted); display: block; text-transform: uppercase; letter-spacing: 0.05em;">Order Reference Number</span>
+                    <strong id="orderNumDisplay" style="font-size: 1.25rem; color: var(--secondary); font-family: monospace;" th:text="${order.orderNumber}">SPM-20261009-XXXX</strong>
+                </div>
+                <button type="button" class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('orderNumDisplay').innerText); alert('Order number copied!');">
+                    Copy
+                </button>
+            </div>
+
+            <!-- Delivery Estimate Highlight -->
+            <div style="background: rgba(40, 123, 255, 0.06); border: 1px solid rgba(40, 123, 255, 0.2); border-radius: var(--radius-md); padding: 0.85rem 1.25rem; max-width: 480px; margin: 0 auto 2rem auto; font-size: 0.9rem; color: var(--deep-blue); display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <span>🚚</span>
+                <span>Estimated Delivery: <strong>3–5 Business Days</strong> (Express Courier Delivery)</span>
+            </div>
+
+            <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                <a th:href="@{/account/orders/{num}(num=${order.orderNumber})}" class="btn btn-primary" style="padding: 0.65rem 1.5rem;">Track My Order</a>
+                <a th:href="@{/products}" class="btn btn-outline" style="padding: 0.65rem 1.5rem;">Continue Shopping</a>
+            </div>
+        </div>
+
+        <!-- Order Summary Details -->
+        <div class="card-box" style="border-radius: var(--radius-lg); margin-top: 1.5rem;">
+            <h3 style="font-size: 1.2rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; color: var(--primary);">
+                Order Summary & Details
+            </h3>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 1.75rem; font-size: 0.9rem;">
+                <div>
+                    <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; letter-spacing: 0.05em;">Delivery Destination</h4>
+                    <strong style="color: var(--text-primary); font-size: 0.95rem; display: block;" th:text="${order.recipientName}">Recipient</strong>
+                    <p style="color: var(--text-secondary); margin-bottom: 0.25rem;" th:text="${order.deliveryAddressText}">Address text</p>
+                    <p style="color: var(--text-muted);">Phone: <strong th:text="${order.recipientPhone}">Phone</strong></p>
+                </div>
+
+                <div>
+                    <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; letter-spacing: 0.05em;">Payment Details</h4>
+                    <p style="margin-bottom: 0.25rem;">Method: <strong th:text="${order.paymentMethod.displayName}">Payment Method</strong></p>
+                    <p style="margin-bottom: 0.25rem;">
+                        Status:
+                        <span th:if="${order.paymentStatus.name() == 'PAID'}" class="badge badge-success">Paid</span>
+                        <span th:if="${order.paymentStatus.name() == 'PENDING'}" class="badge badge-warning">Pending</span>
+                        <span th:if="${order.paymentStatus.name() == 'FAILED'}" class="badge badge-danger">Failed</span>
+                    </p>
+                    <p th:if="${payment != null and payment.transactionReference != null}" style="font-size: 0.8rem; color: var(--text-muted);">
+                        Txn Reference: <code th:text="${payment.transactionReference}">TXN-123</code>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Ordered Line Items -->
+            <div style="border-top: 1px solid var(--border-color); padding-top: 1.25rem;">
+                <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; letter-spacing: 0.05em;">Items Ordered</h4>
+
+                <div th:each="item : ${order.items}" style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #f1f5f9;">
+                    <img th:src="${item.productImageUrl}" th:alt="${item.productName}"
+                         style="width: 52px; height: 52px; object-fit: contain; background: #f8fafc; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                    <div style="flex: 1; font-size: 0.9rem;">
+                        <span style="font-weight: 600; color: var(--text-primary);" th:text="${item.productName}">Product Name</span>
+                        <div style="font-size: 0.775rem; color: var(--text-muted);">
+                            SKU: <span th:text="${item.productSku}">SKU</span> | Qty: <strong th:text="${item.quantity}">1</strong>
+                        </div>
+                    </div>
+                    <strong style="color: var(--primary);" th:text="'₹' + ${#numbers.formatDecimal(item.lineTotal, 1, 2)}">₹99.00</strong>
+                </div>
+
+                <div style="max-width: 280px; margin-left: auto; font-size: 0.9rem; padding-top: 0.5rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem;">
+                        <span style="color: var(--text-muted);">Subtotal:</span>
+                        <span th:text="'₹' + ${#numbers.formatDecimal(order.subtotal, 1, 2)}">₹99.00</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem;">
+                        <span style="color: var(--text-muted);">Delivery:</span>
+                        <span th:text="${order.shippingFee == 0 ? 'FREE' : '₹' + #numbers.formatDecimal(order.shippingFee, 1, 2)}">₹0.00</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 1.15rem; color: var(--primary); border-top: 1px dashed var(--border-color); padding-top: 0.5rem; margin-top: 0.5rem;">
+                        <span>Total Paid:</span>
+                        <span th:text="'₹' + ${#numbers.formatDecimal(order.finalAmount, 1, 2)}">₹99.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

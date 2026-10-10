@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Order Tracking #' + ${order.orderNumber})}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: header-top}"></div>
+<header th:replace="~{fragments/layout :: header}"></header>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<main class="main-content">
+    <div class="container" style="max-width: 900px; padding-top: 2rem;">
+
+        <!-- Header Bar -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <a th:href="@{/account/orders}" style="color: var(--secondary); font-size: 0.85rem; font-weight: 600;">← Back to Order History</a>
+                <h1 style="font-size: 1.75rem; margin-top: 0.25rem;">
+                    Order <span style="color: var(--secondary);" th:text="'#' + ${order.orderNumber}">#SPM-123</span>
+                </h1>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">
+                    Placed on <strong th:text="${#temporals.format(order.createdAt, 'dd MMMM yyyy, HH:mm')}">Date</strong>
+                </p>
+            </div>
+
+            <!-- Cancellation Action for eligible orders -->
+            <div th:if="${order.cancellable}">
+                <button type="button" class="btn btn-outline btn-sm" style="color: var(--danger); border-color: #fca5a5;"
+                        onclick="document.getElementById('cancelOrderDialog').style.display='block'">
+                    Cancel Order
+                </button>
+            </div>
+        </div>
+
+        <!-- Visual Tracking Stepper (Unless Cancelled) -->
+        <div class="card-box" th:if="${order.orderStatus.name() != 'CANCELLED'}">
+            <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem;">Shipment Progress</h3>
+
+            <div class="stepper">
+                <!-- Step 1: Placed -->
+                <div class="step-item" th:classappend="${order.orderStatus.name() == 'PLACED' ? 'active' : 'completed'}">
+                    <div class="step-circle">1</div>
+                    <div class="step-title">Order Placed</div>
+                </div>
+
+                <!-- Step 2: Confirmed -->
+                <div class="step-item" th:classappend="${order.orderStatus.name() == 'CONFIRMED' ? 'active' : (order.orderStatus.name() == 'PLACED' ? '' : 'completed')}">
+                    <div class="step-circle">2</div>
+                    <div class="step-title">Confirmed</div>
+                </div>
+
+                <!-- Step 3: Processing -->
+                <div class="step-item" th:classappend="${order.orderStatus.name() == 'PROCESSING' ? 'active' : (order.orderStatus.name() == 'PLACED' or order.orderStatus.name() == 'CONFIRMED' ? '' : 'completed')}">
+                    <div class="step-circle">3</div>
+                    <div class="step-title">Processing</div>
+                </div>
+
+                <!-- Step 4: Shipped -->
+                <div class="step-item" th:classappend="${order.orderStatus.name() == 'SHIPPED' ? 'active' : (order.orderStatus.name() == 'OUT_FOR_DELIVERY' or order.orderStatus.name() == 'DELIVERED' ? 'completed' : '')}">
+                    <div class="step-circle">4</div>
+                    <div class="step-title">Shipped</div>
+                </div>
+
+                <!-- Step 5: Out for Delivery -->
+                <div class="step-item" th:classappend="${order.orderStatus.name() == 'OUT_FOR_DELIVERY' ? 'active' : (order.orderStatus.name() == 'DELIVERED' ? 'completed' : '')}">
+                    <div class="step-circle">5</div>
+                    <div class="step-title">Out for Delivery</div>
+                </div>
+
+                <!-- Step 6: Delivered -->
+                <div class="step-item" th:classappend="${order.orderStatus.name() == 'DELIVERED' ? 'completed' : ''}">
+                    <div class="step-circle">✓</div>
+                    <div class="step-title">Delivered</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cancelled Alert Banner if Order was Cancelled -->
+        <div th:if="${order.orderStatus.name() == 'CANCELLED'}" class="alert alert-danger" style="margin-bottom: 1.5rem;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+            <div>
+                <strong>This order was cancelled.</strong>
+                <div style="font-size: 0.85rem; margin-top: 0.25rem;">Inventory was safely restocked, and any qualifying payments have been marked for refund.</div>
+            </div>
+        </div>
+
+        <!-- Order Breakdown Grid -->
+        <div style="display: grid; grid-template-columns: 1fr 340px; gap: 2rem; align-items: start;">
+
+            <!-- Items Snapshot Table -->
+            <div class="card-box" style="padding: 0; overflow: hidden;">
+                <div class="card-box-header" style="padding: 1rem 1.25rem; margin-bottom: 0;">
+                    <h3>Order Items Snapshot</h3>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product Details</th>
+                                <th>Price</th>
+                                <th style="text-align: center;">Qty</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="item : ${order.items}">
+                                <td>
+                                    <div style="display: flex; gap: 0.75rem; align-items: center;">
+                                        <img th:src="${item.productImageUrl}" th:alt="${item.productName}"
+                                             style="width: 48px; height: 48px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                                        <div>
+                                            <span style="font-weight: 600; color: var(--primary);" th:text="${item.productName}">Product Name</span>
+                                            <div style="font-size: 0.75rem; color: var(--text-muted);" th:text="'SKU: ' + ${item.productSku}">SKU</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td th:text="'₹' + ${#numbers.formatDecimal(item.unitPrice, 1, 2)}">₹99.00</td>
+                                <td style="text-align: center; font-weight: 700;" th:text="${item.quantity}">1</td>
+                                <td style="font-weight: 700; color: var(--primary);" th:text="'₹' + ${#numbers.formatDecimal(item.lineTotal, 1, 2)}">₹99.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Summary & Details Box -->
+            <div>
+                <!-- Delivery Info Card -->
+                <div class="card-box" style="margin-bottom: 1.25rem;">
+                    <h4 style="font-size: 0.9rem; text-transform: uppercase; color: var(--text-light); margin-bottom: 0.75rem;">Delivery Destination</h4>
+                    <strong style="color: var(--primary); display: block;" th:text="${order.recipientName}">Recipient Name</strong>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.25rem 0;" th:text="${order.deliveryAddressText}">Address text</p>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Phone: <strong th:text="${order.recipientPhone}">Phone</strong></p>
+                </div>
+
+                <!-- Payment Info Card -->
+                <div class="card-box" style="margin-bottom: 1.25rem;">
+                    <h4 style="font-size: 0.9rem; text-transform: uppercase; color: var(--text-light); margin-bottom: 0.75rem;">Payment Method</h4>
+                    <p style="font-size: 0.9rem; font-weight: 600;" th:text="${order.paymentMethod.displayName}">UPI</p>
+                    <div style="margin-top: 0.25rem;">
+                        Status:
+                        <span th:if="${order.paymentStatus.name() == 'PAID'}" class="badge badge-success">Paid</span>
+                        <span th:if="${order.paymentStatus.name() == 'PENDING'}" class="badge badge-warning">Pending</span>
+                        <span th:if="${order.paymentStatus.name() == 'REFUNDED'}" class="badge badge-secondary">Refunded</span>
+                        <span th:if="${order.paymentStatus.name() == 'FAILED'}" class="badge badge-danger">Failed</span>
+                    </div>
+
+                    <div th:if="${order.paymentMethod.name() != 'COD' and order.paymentStatus.name() == 'PENDING' and order.orderStatus.name() != 'CANCELLED'}" style="margin-top: 1rem;">
+                        <a th:href="@{/checkout/payment/{num}(num=${order.orderNumber})}" class="btn btn-accent btn-sm btn-block">
+                            Complete Online Payment Now →
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Cost Breakdown Card -->
+                <div class="card-box">
+                    <h4 style="font-size: 0.9rem; text-transform: uppercase; color: var(--text-light); margin-bottom: 0.75rem;">Order Billing</h4>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 0.35rem;">
+                        <span style="color: var(--text-muted);">Subtotal</span>
+                        <span th:text="'₹' + ${#numbers.formatDecimal(order.subtotal, 1, 2)}">₹99.00</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 0.35rem;">
+                        <span style="color: var(--text-muted);">Shipping</span>
+                        <span th:text="${order.shippingFee == 0 ? 'FREE' : '₹' + #numbers.formatDecimal(order.shippingFee, 1, 2)}">₹0.00</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 1.15rem; color: var(--primary); border-top: 1px dashed var(--border-color); padding-top: 0.5rem; margin-top: 0.5rem;">
+                        <span>Total Paid</span>
+                        <span th:text="'₹' + ${#numbers.formatDecimal(order.finalAmount, 1, 2)}">₹99.00</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Status History Audit Trail -->
+        <div class="card-box" style="margin-top: 2rem;">
+            <div class="card-box-header">
+                <h3>Order Activity & Status History</h3>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <div th:each="hist : ${statusHistory}" style="display: flex; gap: 1rem; align-items: flex-start; font-size: 0.875rem;">
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--secondary); margin-top: 6px;"></div>
+                    <div style="flex: 1;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <strong style="color: var(--primary);" th:text="${hist.status.displayName}">Status</strong>
+                            <span style="color: var(--text-light); font-size: 0.8rem;" th:text="${#temporals.format(hist.changedAt, 'dd MMM yyyy, HH:mm')}">Time</span>
+                        </div>
+                        <p style="color: var(--text-muted); margin-top: 0.15rem;" th:text="${hist.comments}">Details</p>
+                        <span style="font-size: 0.75rem; color: var(--text-light);" th:text="'By: ' + ${hist.changedBy}">By</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<!-- Cancel Order Modal Dialog -->
+<div id="cancelOrderDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: var(--radius-md); max-width: 480px; width: 90%; margin: 10% auto; padding: 2rem; box-shadow: var(--shadow-lg);">
+        <h3 style="margin-bottom: 0.5rem;">Cancel Order Confirmation</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem;">
+            Are you sure you want to cancel order <strong th:text="${order.orderNumber}">#SPM-123</strong>? Restocking will be performed automatically.
+        </p>
+
+        <form th:action="@{/account/orders/{num}/cancel(num=${order.orderNumber})}" method="post">
+            <div class="form-group">
+                <label class="form-label">Reason for cancellation (optional)</label>
+                <select name="reason" class="form-control">
+                    <option value="Changed my mind">Changed my mind</option>
+                    <option value="Ordered by mistake">Ordered by mistake</option>
+                    <option value="Need to change delivery address">Need to change delivery address</option>
+                    <option value="Found a better price">Found a better price</option>
+                </select>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+                <button type="button" class="btn btn-outline" onclick="document.getElementById('cancelOrderDialog').style.display='none'">Keep Order</button>
+                <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

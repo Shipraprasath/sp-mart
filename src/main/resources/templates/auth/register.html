@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Create Account')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: announcement-bar}"></div>
+<header th:replace="~{fragments/layout :: header}"></header>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<main class="main-content">
+    <div class="container" style="max-width: 1040px;">
+
+        <!-- Split-Screen Registration Layout -->
+        <div class="auth-split-wrapper">
+
+            <!-- Left Panel -->
+            <div class="auth-split-left">
+                <div>
+                    <a th:href="@{/}" class="brand-logo brand-logo-light" style="margin-bottom: 2.5rem;">
+                        <div class="brand-icon-box">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        </div>
+                        <span>SP <span class="brand-accent-text" style="color: var(--cyan-highlight);">MART</span></span>
+                    </a>
+
+                    <span class="hero-badge">JOIN SP MART</span>
+                    <h2 style="font-size: 2.2rem; color: #FFFFFF; margin-bottom: 1rem; line-height: 1.2;">
+                        Start Shopping Smarter.
+                    </h2>
+                    <p style="color: #94A3B8; font-size: 1.05rem; line-height: 1.6;">
+                        Create your buyer account in seconds. Unlock exclusive discounts, fast checkout, order tracking, and intelligent AI product comparisons.
+                    </p>
+                </div>
+
+                <div style="border-radius: var(--radius-lg); overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);">
+                    <img th:src="@{https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=800&q=80}"
+                         alt="Electronics Customer Experience"
+                         style="width: 100%; height: 210px; object-fit: cover;">
+                </div>
+
+                <div style="font-size: 0.8rem; color: #64748B; margin-top: 1.5rem;">
+                    Secure 256-bit SSL encrypted registration with BCrypt password hashing
+                </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="auth-split-right">
+                <div style="margin-bottom: 1.75rem;">
+                    <h1 style="font-size: 1.85rem; margin-bottom: 0.5rem; color: var(--midnight-navy);">Create Buyer Account</h1>
+                    <p style="color: var(--secondary-text); font-size: 0.925rem;">Sign up for a free SP MART customer account.</p>
+                </div>
+
+                <form th:action="@{/register}" th:object="${registrationDto}" method="post" data-prevent-double-submit>
+                    <div class="form-group">
+                        <label class="form-label" for="fullName">Full Name</label>
+                        <input type="text" id="fullName" th:field="*{fullName}" class="form-control" placeholder="Rahul Verma" required>
+                        <span th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" class="form-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email Address</label>
+                        <input type="email" id="email" th:field="*{email}" class="form-control" placeholder="rahul@example.com" required>
+                        <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="form-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="phone">Phone Number</label>
+                        <input type="tel" id="phone" th:field="*{phone}" class="form-control" placeholder="9876543210" required>
+                        <span th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="form-error"></span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label" for="password">Password</label>
+                            <input type="password" id="password" th:field="*{password}" class="form-control" placeholder="Min. 6 chars" required>
+                            <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="form-error"></span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="confirmPassword">Confirm Password</label>
+                            <input type="password" id="confirmPassword" th:field="*{confirmPassword}" class="form-control" placeholder="Repeat password" required>
+                            <span th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}" class="form-error"></span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 0.5rem; margin-bottom: 1.25rem;">
+                        Create Account
+                    </button>
+                </form>
+
+                <div style="text-align: center; font-size: 0.925rem; color: var(--secondary-text); margin-bottom: 1rem;">
+                    Already have an account? <a th:href="@{/login}" style="color: var(--electric-blue); font-weight: 600;">Sign in here</a>
+                </div>
+
+                <div style="text-align: center; font-size: 0.85rem; color: var(--secondary-text); padding-top: 0.75rem; border-top: 1px solid var(--border-grey);">
+                    Want to sell products on SP MART? <a th:href="@{/seller/register}" style="color: var(--electric-blue); font-weight: 600;">Apply as Seller</a>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Upgrade Your World')}"></head>
+<body>
+
+<!-- Section A: Announcement Bar -->
+<div th:replace="~{fragments/layout :: announcement-bar}"></div>
+
+<!-- Section B: Sticky Navigation Header -->
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<!-- Global Alerts -->
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<main class="main-content">
+    <div class="container">
+
+        <!-- Section C: Hero Banner -->
+        <section class="hero-section">
+            <div class="hero-grid">
+                <div>
+                    <span class="hero-badge">NEW SEASON • SMARTER LIVING</span>
+                    <h1 class="hero-title">Upgrade Your World.</h1>
+                    <p class="hero-desc">
+                        Discover powerful technology, smarter appliances, and everyday essentials — all in one place. Powered by intelligent AI recommendations and doorstep express delivery.
+                    </p>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <a th:href="@{/products}" class="btn btn-primary btn-lg">Explore Products</a>
+                        <a th:href="@{/products(sortBy='price_asc')}" class="btn btn-outline-white btn-lg">Discover Best Deals</a>
+                    </div>
+                </div>
+                <div class="hero-image-wrapper">
+                    <img th:src="@{https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&q=80}"
+                         alt="Featured Electronics"
+                         class="hero-image">
+                </div>
+            </div>
+        </section>
+
+        <!-- Section D: Shop by Category -->
+        <section style="margin: 3.5rem 0;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.75rem;">
+                <div>
+                    <h2 class="section-title">Shop by Category</h2>
+                    <p class="section-subtitle">Explore 12 curated electronics departments</p>
+                </div>
+                <a th:href="@{/products}" style="color: var(--electric-blue); font-weight: 600; font-size: 0.925rem;">View All Categories →</a>
+            </div>
+
+            <div class="category-grid">
+                <a th:each="cat : ${categories}"
+                   th:href="@{/products/category/{slug}(slug=${cat.slug})}"
+                   class="category-card">
+                    <div class="category-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                    </div>
+                    <span class="category-card-title" th:text="${cat.name}">Category</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- Section E: Today's Best Deals -->
+        <section style="margin: 3.5rem 0;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.75rem;">
+                <div>
+                    <h2 class="section-title">Big Technology. Better Prices.</h2>
+                    <p class="section-subtitle">Limited-period discounts on flagship technology</p>
+                </div>
+                <a th:href="@{/products(sortBy='price_asc')}" style="color: var(--electric-blue); font-weight: 600; font-size: 0.925rem;">See All Deals →</a>
+            </div>
+
+            <div class="product-grid">
+                <div th:each="p : ${bestDeals}" class="product-card">
+                    <!-- Wishlist button -->
+                    <form th:action="@{/wishlist/add/{id}(id=${p.id})}" method="post">
+                        <button type="submit" class="card-wishlist-btn" title="Add to Wishlist">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </button>
+                    </form>
+
+                    <span th:if="${p.hasDiscount()}" class="card-discount-badge" th:text="${p.getDiscountPercentage()} + '% OFF'">17% OFF</span>
+
+                    <a th:href="@{/products/{id}(id=${p.id})}" class="card-image-box">
+                        <img th:src="${p.mainImageUrl}" th:alt="${p.name}">
+                    </a>
+
+                    <div class="card-content">
+                        <span class="card-brand" th:text="${p.brand}">SAMSUNG</span>
+                        <a th:href="@{/products/{id}(id=${p.id})}" class="card-title" th:text="${p.name}">Product Name</a>
+
+                        <div class="card-rating">
+                            <span>★</span>
+                            <strong th:text="${p.averageRating}">4.8</strong>
+                            <span class="card-rating-count" th:text="'· ' + ${p.reviewCount} + ' reviews'">· 128 reviews</span>
+                        </div>
+
+                        <div class="card-prices">
+                            <span class="card-current-price" th:text="'₹' + ${#numbers.formatDecimal(p.getEffectivePrice(), 1, 'COMMA', 0, 'POINT')}">₹24,999</span>
+                            <span th:if="${p.hasDiscount()}" class="card-original-price" th:text="'₹' + ${#numbers.formatDecimal(p.price, 1, 'COMMA', 0, 'POINT')}">₹29,999</span>
+                        </div>
+
+                        <div class="card-actions">
+                            <form th:action="@{/cart/add}" method="post" style="display: block;">
+                                <input type="hidden" name="productId" th:value="${p.id}">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="btn btn-primary btn-sm btn-block">Add to Cart</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section F: Bestselling Electronics -->
+        <section style="margin: 3.5rem 0;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.75rem;">
+                <div>
+                    <h2 class="section-title">Powerful Performance. Smarter Choices.</h2>
+                    <p class="section-subtitle">Our most popular devices rated highly by verified owners</p>
+                </div>
+                <a th:href="@{/products(sortBy='rating')}" style="color: var(--electric-blue); font-weight: 600; font-size: 0.925rem;">View Top Rated →</a>
+            </div>
+
+            <div class="product-grid">
+                <div th:each="p : ${bestSellers}" class="product-card">
+                    <form th:action="@{/wishlist/add/{id}(id=${p.id})}" method="post">
+                        <button type="submit" class="card-wishlist-btn" title="Add to Wishlist">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </button>
+                    </form>
+
+                    <span th:if="${p.hasDiscount()}" class="card-discount-badge" th:text="${p.getDiscountPercentage()} + '% OFF'">15% OFF</span>
+
+                    <a th:href="@{/products/{id}(id=${p.id})}" class="card-image-box">
+                        <img th:src="${p.mainImageUrl}" th:alt="${p.name}">
+                    </a>
+
+                    <div class="card-content">
+                        <span class="card-brand" th:text="${p.brand}">BRAND</span>
+                        <a th:href="@{/products/{id}(id=${p.id})}" class="card-title" th:text="${p.name}">Product Name</a>
+
+                        <div class="card-rating">
+                            <span>★</span>
+                            <strong th:text="${p.averageRating}">4.9</strong>
+                            <span class="card-rating-count" th:text="'· ' + ${p.reviewCount} + ' reviews'">· 240 reviews</span>
+                        </div>
+
+                        <div class="card-prices">
+                            <span class="card-current-price" th:text="'₹' + ${#numbers.formatDecimal(p.getEffectivePrice(), 1, 'COMMA', 0, 'POINT')}">₹54,990</span>
+                            <span th:if="${p.hasDiscount()}" class="card-original-price" th:text="'₹' + ${#numbers.formatDecimal(p.price, 1, 'COMMA', 0, 'POINT')}">₹64,990</span>
+                        </div>
+
+                        <div class="card-actions">
+                            <form th:action="@{/cart/add}" method="post" style="display: block;">
+                                <input type="hidden" name="productId" th:value="${p.id}">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="btn btn-primary btn-sm btn-block">Add to Cart</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section G: Personal Recommendations -->
+        <section style="margin: 3.5rem 0; background-color: #FFFFFF; border: 1px solid var(--border-grey); border-radius: var(--radius-xl); padding: 2.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.5rem;">
+                <div>
+                    <span class="badge badge-cyan" style="margin-bottom: 0.5rem;">🤖 AI RECOMMENDER ENGINE</span>
+                    <h2 class="section-title">Picked for Your Next Upgrade.</h2>
+                    <p class="section-subtitle">Intelligent matches curated based on performance ratings and user preference</p>
+                </div>
+                <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('ai-assistant-toggle').click()">
+                    Ask AI Assistant 💬
+                </button>
+            </div>
+
+            <div class="product-grid">
+                <div th:each="p : ${recommendations}" class="product-card" style="border-color: #E2E8F0;">
+                    <a th:href="@{/products/{id}(id=${p.id})}" class="card-image-box">
+                        <img th:src="${p.mainImageUrl}" th:alt="${p.name}">
+                    </a>
+                    <div class="card-content">
+                        <span class="card-brand" th:text="${p.brand}">BRAND</span>
+                        <a th:href="@{/products/{id}(id=${p.id})}" class="card-title" th:text="${p.name}">Product Name</a>
+                        <div class="card-prices">
+                            <span class="card-current-price" th:text="'₹' + ${#numbers.formatDecimal(p.getEffectivePrice(), 1, 'COMMA', 0, 'POINT')}">₹19,999</span>
+                        </div>
+                        <a th:href="@{/products/{id}(id=${p.id})}" class="btn btn-outline btn-sm btn-block">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section H: Premium Brands -->
+        <section style="margin: 3.5rem 0;">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h2 class="section-title">Premium Technology Brands</h2>
+                <p class="section-subtitle">Authorized distributor partnerships with global manufacturers</p>
+            </div>
+
+            <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
+                <a th:href="@{/products(brand='Apple')}" class="card-box" style="padding: 1rem 1.75rem; font-family: var(--font-heading); font-weight: 700; font-size: 1.1rem; color: var(--midnight-navy);"> Apple</a>
+                <a th:href="@{/products(brand='Samsung')}" class="card-box" style="padding: 1rem 1.75rem; font-family: var(--font-heading); font-weight: 700; font-size: 1.1rem; color: var(--midnight-navy);">SAMSUNG</a>
+                <a th:href="@{/products(brand='Sony')}" class="card-box" style="padding: 1rem 1.75rem; font-family: var(--font-heading); font-weight: 700; font-size: 1.1rem; color: var(--midnight-navy);">SONY</a>
+                <a th:href="@{/products(brand='Dell')}" class="card-box" style="padding: 1rem 1.75rem; font-family: var(--font-heading); font-weight: 700; font-size: 1.1rem; color: var(--midnight-navy);">DELL</a>
+                <a th:href="@{/products(brand='HP')}" class="card-box" style="padding: 1rem 1.75rem; font-family: var(--font-heading); font-weight: 700; font-size: 1.1rem; color: var(--midnight-navy);">hp</a>
+                <a th:href="@{/products(brand='LG')}" class="card-box" style="padding: 1rem 1.75rem; font-family: var(--font-heading); font-weight: 700; font-size: 1.1rem; color: var(--midnight-navy);">LG</a>
+                <a th:href="@{/products(brand='Realme')}" class="card-box" style="padding: 1rem 1.75rem; font-family: var(--font-heading); font-weight: 700; font-size: 1.1rem; color: var(--midnight-navy);">realme</a>
+            </div>
+        </section>
+
+        <!-- Section I: Smart-Home Essentials -->
+        <section th:if="${!#lists.isEmpty(smartHomeProducts)}" style="margin: 3.5rem 0;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.75rem;">
+                <div>
+                    <h2 class="section-title">Smart-Home Essentials</h2>
+                    <p class="section-subtitle">Connected living with voice assistants and security devices</p>
+                </div>
+                <a th:href="@{/products/category/smart-home-devices}" style="color: var(--electric-blue); font-weight: 600; font-size: 0.925rem;">Explore Smart Home →</a>
+            </div>
+
+            <div class="product-grid">
+                <div th:each="p : ${smartHomeProducts}" class="product-card">
+                    <a th:href="@{/products/{id}(id=${p.id})}" class="card-image-box">
+                        <img th:src="${p.mainImageUrl}" th:alt="${p.name}">
+                    </a>
+                    <div class="card-content">
+                        <span class="card-brand" th:text="${p.brand}">BRAND</span>
+                        <a th:href="@{/products/{id}(id=${p.id})}" class="card-title" th:text="${p.name}">Product Name</a>
+                        <div class="card-prices">
+                            <span class="card-current-price" th:text="'₹' + ${#numbers.formatDecimal(p.getEffectivePrice(), 1, 'COMMA', 0, 'POINT')}">₹5,999</span>
+                        </div>
+                        <a th:href="@{/products/{id}(id=${p.id})}" class="btn btn-outline btn-sm btn-block">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section J: Why Shop with SP MART? -->
+        <section style="margin: 3.5rem 0;">
+            <div style="text-align: center; margin-bottom: 2.25rem;">
+                <h2 class="section-title">Why Shop with SP MART?</h2>
+                <p class="section-subtitle">Engineered for reliability, transparency, and superior electronics shopping</p>
+            </div>
+
+            <div class="why-shop-grid">
+                <div class="why-shop-card">
+                    <div class="why-shop-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    </div>
+                    <strong style="color: var(--primary);">Secure Checkout</strong>
+                    <p style="font-size: 0.85rem; color: var(--secondary-text);">256-bit encrypted checkout supporting instant UPI, GPay, Paytm, and Cash on Delivery.</p>
+                </div>
+
+                <div class="why-shop-card">
+                    <div class="why-shop-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                    </div>
+                    <strong style="color: var(--primary);">Transparent Pricing</strong>
+                    <p style="font-size: 0.85rem; color: var(--secondary-text);">No hidden fees. Free doorstep shipping on all orders over ₹500 across India.</p>
+                </div>
+
+                <div class="why-shop-card">
+                    <div class="why-shop-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                    </div>
+                    <strong style="color: var(--primary);">Real-Time Order Tracking</strong>
+                    <p style="font-size: 0.85rem; color: var(--secondary-text);">Track order progression live through each milestone from packaging to dispatch.</p>
+                </div>
+
+                <div class="why-shop-card">
+                    <div class="why-shop-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    </div>
+                    <strong style="color: var(--primary);">Helpful Product Info</strong>
+                    <p style="font-size: 0.85rem; color: var(--secondary-text);">Full technical specifications and our AI shopping assistant to compare hardware specs.</p>
+                </div>
+
+                <div class="why-shop-card">
+                    <div class="why-shop-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                    </div>
+                    <strong style="color: var(--primary);">Responsive Customer Support</strong>
+                    <p style="font-size: 0.85rem; color: var(--secondary-text);">Dedicated support desk to resolve technical inquiries, returns, and delivery assistance.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section K: Customer Reviews -->
+        <section th:if="${!#lists.isEmpty(customerReviews)}" style="margin: 3.5rem 0;">
+            <div style="text-align: center; margin-bottom: 2.25rem;">
+                <h2 class="section-title">Verified Customer Experiences</h2>
+                <p class="section-subtitle">Real feedback from genuine technology buyers</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 1.5rem;">
+                <div th:each="rev : ${customerReviews}" class="card-box" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="color: #F59E0B; margin-bottom: 0.5rem; font-size: 1.1rem;">
+                            <span th:each="i : ${#numbers.sequence(1, rev.rating)}">★</span>
+                        </div>
+                        <h4 style="font-size: 1rem; margin-bottom: 0.5rem;" th:text="${rev.title}">Review Title</h4>
+                        <p style="font-size: 0.875rem; color: var(--secondary-text); line-height: 1.5;" th:text="${rev.comment}">Review comment</p>
+                    </div>
+                    <div style="margin-top: 1.25rem; padding-top: 0.75rem; border-top: 1px solid var(--border-grey); display: flex; justify-content: space-between; align-items: center; font-size: 0.775rem;">
+                        <strong style="color: var(--primary);" th:text="${rev.user.fullName}">Customer</strong>
+                        <span style="color: #059669; font-weight: 600;">✓ Verified Buyer</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section L: Newsletter -->
+        <section style="margin: 3.5rem 0; background: linear-gradient(135deg, #0B1220 0%, #142B4A 100%); color: #FFFFFF; border-radius: var(--radius-xl); padding: 3rem; text-align: center;">
+            <div style="max-width: 580px; margin: 0 auto;">
+                <span class="badge badge-cyan" style="margin-bottom: 1rem;">EXCLUSIVE DEALS</span>
+                <h2 style="color: #FFFFFF; font-size: 2rem; margin-bottom: 0.75rem;">Stay Ahead with SP MART Tech Insider</h2>
+                <p style="color: #94A3B8; font-size: 0.95rem; margin-bottom: 1.75rem;">
+                    Subscribe to receive early notifications on flash sales, new flagship releases, and personalized AI tech picks.
+                </p>
+
+                <div id="newsletter-feedback" style="display: none; margin-bottom: 1rem;"></div>
+
+                <form id="newsletter-form" style="display: flex; gap: 0.75rem; max-width: 460px; margin: 0 auto;">
+                    <input type="email" id="newsletter-email" class="form-control" placeholder="Enter your email address..." required style="background: rgba(255, 255, 255, 0.95);">
+                    <button type="submit" class="btn btn-primary" style="white-space: nowrap;">Subscribe</button>
+                </form>
+            </div>
+        </section>
+
+    </div>
+</main>
+
+<!-- Section M: Deep Navy Footer -->
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin-layout :: admin-head('Seller Management')}"></head>
+<body>
+
+<div class="admin-layout">
+    <!-- Admin Sidebar Navigation -->
+    <div th:replace="~{fragments/admin-layout :: sidebar('sellers')}"></div>
+
+    <!-- Main Content Area -->
+    <main class="admin-main">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2rem;">
+            <div>
+                <h1 style="font-size: 1.75rem;">Seller Accounts & Approvals</h1>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Review merchant applications, approve trustworthy vendors, or suspend policy-violating stores.</p>
+            </div>
+            <div th:if="${pendingCount > 0}">
+                <span class="badge badge-warning" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">
+                    ⚠️ <span th:text="${pendingCount}">1</span> Pending Application(s)
+                </span>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${successMessage}" class="alert alert-success" style="margin-bottom: 1.5rem; padding: 1rem 1.25rem; border-radius: var(--radius-sm); background: #ecfdf5; border-left: 4px solid var(--accent); color: #065f46;" th:text="${successMessage}">
+            Success message
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger" style="margin-bottom: 1.5rem; padding: 1rem 1.25rem; border-radius: var(--radius-sm); background: #fef2f2; border-left: 4px solid var(--danger); color: #991b1b;" th:text="${errorMessage}">
+            Error message
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="card-box" style="margin-bottom: 1.5rem; padding: 1.25rem;">
+            <form th:action="@{/admin/sellers}" method="get" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
+                <div style="flex: 1; min-width: 250px;">
+                    <input type="text" name="keyword" th:value="${keyword}" placeholder="Search by store name, business email or GSTIN..." class="form-control" style="width: 100%;">
+                </div>
+                <div>
+                    <select name="status" class="form-control" onchange="this.form.submit()">
+                        <option value="" th:selected="${selectedStatus == null}">All Account Statuses</option>
+                        <option value="PENDING_APPROVAL" th:selected="${selectedStatus?.name() == 'PENDING_APPROVAL'}">Pending Approval</option>
+                        <option value="APPROVED" th:selected="${selectedStatus?.name() == 'APPROVED'}">Approved / Active</option>
+                        <option value="REJECTED" th:selected="${selectedStatus?.name() == 'REJECTED'}">Rejected</option>
+                        <option value="SUSPENDED" th:selected="${selectedStatus?.name() == 'SUSPENDED'}">Suspended</option>
+                    </select>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                    <a th:href="@{/admin/sellers}" class="btn btn-outline btn-sm">Reset</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Sellers Table -->
+        <div class="card-box">
+            <div class="card-box-header">
+                <h3>Registered Merchant Profiles (<span th:text="${sellerPage.totalElements}">0</span>)</h3>
+            </div>
+
+            <div th:if="${sellerPage.empty}" style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🏪</div>
+                <h4>No sellers found</h4>
+                <p>No seller accounts match your search or filter criteria.</p>
+            </div>
+
+            <div th:unless="${sellerPage.empty}" class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Store & Merchant</th>
+                            <th>Contact Details</th>
+                            <th>GSTIN / Tax ID</th>
+                            <th>Status</th>
+                            <th>Applied On</th>
+                            <th style="text-align: right;">Administrative Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="seller : ${sellerPage.content}">
+                            <td>
+                                <strong th:text="${seller.storeName}" style="font-size: 1rem; color: var(--text-primary);">Store Name</strong><br>
+                                <span style="font-size: 0.8rem; color: var(--text-muted);">
+                                    Owner: <span th:text="${seller.user.fullName}">Owner Name</span>
+                                </span>
+                            </td>
+                            <td>
+                                <div style="font-size: 0.875rem;" th:text="${seller.businessEmail}">seller@spmart.com</div>
+                                <div style="font-size: 0.775rem; color: var(--text-muted);" th:text="${seller.phone}">+91 9876543210</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:text="${seller.businessAddress}">Address</div>
+                            </td>
+                            <td>
+                                <code th:text="${seller.gstin != null ? seller.gstin : 'N/A'}" style="font-size: 0.8rem;">GSTIN12345</code>
+                            </td>
+                            <td>
+                                <span th:if="${seller.status.name() == 'APPROVED'}" class="badge badge-success">Approved</span>
+                                <span th:if="${seller.status.name() == 'PENDING_APPROVAL'}" class="badge badge-warning">Pending Approval</span>
+                                <span th:if="${seller.status.name() == 'REJECTED'}" class="badge badge-danger">Rejected</span>
+                                <span th:if="${seller.status.name() == 'SUSPENDED'}" class="badge" style="background: #64748b; color: white;">Suspended</span>
+                            </td>
+                            <td style="font-size: 0.8rem; color: var(--text-muted);" th:text="${seller.createdAt != null ? #temporals.format(seller.createdAt, 'dd MMM yyyy') : 'N/A'}">
+                                01 Oct 2026
+                            </td>
+                            <td style="text-align: right;">
+                                <div style="display: inline-flex; gap: 0.35rem; justify-content: flex-end;">
+                                    <!-- Approve button -->
+                                    <form th:if="${seller.status.name() != 'APPROVED'}" th:action="@{/admin/sellers/{id}/approve(id=${seller.id})}" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-primary" onclick="return confirm('Approve this seller for storefront operations?')">Approve</button>
+                                    </form>
+
+                                    <!-- Reject button -->
+                                    <form th:if="${seller.status.name() == 'PENDING_APPROVAL'}" th:action="@{/admin/sellers/{id}/reject(id=${seller.id})}" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Reject this seller application?')">Reject</button>
+                                    </form>
+
+                                    <!-- Suspend button -->
+                                    <form th:if="${seller.status.name() == 'APPROVED'}" th:action="@{/admin/sellers/{id}/suspend(id=${seller.id})}" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Suspend this seller account? All their catalog listings will become inactive.')">Suspend</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div th:if="${sellerPage.totalPages > 1}" style="display: flex; justify-content: center; gap: 0.5rem; padding: 1.5rem 0;">
+                <a th:if="${sellerPage.hasPrevious()}" th:href="@{/admin/sellers(page=${sellerPage.number - 1}, keyword=${keyword}, status=${selectedStatus})}" class="btn btn-outline btn-sm">← Previous</a>
+                <span style="padding: 0.4rem 0.8rem; font-size: 0.85rem; color: var(--text-muted);" th:text="'Page ' + (${sellerPage.number} + 1) + ' of ' + ${sellerPage.totalPages}">Page 1 of 1</span>
+                <a th:if="${sellerPage.hasNext()}" th:href="@{/admin/sellers(page=${sellerPage.number + 1}, keyword=${keyword}, status=${selectedStatus})}" class="btn btn-outline btn-sm">Next →</a>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

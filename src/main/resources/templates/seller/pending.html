@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Seller Application Pending')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: announcement-bar}"></div>
+<header th:replace="~{fragments/layout :: header}"></header>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<main class="main-content">
+    <div class="container" style="max-width: 680px; padding-top: 3.5rem;">
+        <div class="card-box" style="text-align: center; padding: 3.5rem 2.5rem; border-top: 6px solid #F59E0B;">
+            <div style="width: 72px; height: 72px; background-color: #FEF3C7; color: #D97706; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+
+            <h1 style="font-size: 2rem; color: var(--midnight-navy); margin-bottom: 0.75rem;">Application Under Review</h1>
+            <p style="color: var(--secondary-text); font-size: 1.05rem; line-height: 1.6; margin-bottom: 2rem;">
+                Thank you for applying to sell on SP MART! Your seller profile has been submitted and is currently awaiting verification by our marketplace administrator team.
+            </p>
+
+            <div style="background-color: var(--soft-bg); border: 1px solid var(--border-grey); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 2rem; text-align: left; font-size: 0.9rem;">
+                <strong style="color: var(--primary); display: block; margin-bottom: 0.5rem;">Verification Steps:</strong>
+                <ul style="padding-left: 1.25rem; color: var(--secondary-text); line-height: 1.6;">
+                    <li>Store identity and contact details verification.</li>
+                    <li>GSTIN / Tax compliance review.</li>
+                    <li>Administrative approval grant for the seller back-office.</li>
+                </ul>
+            </div>
+
+            <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                <a th:href="@{/}" class="btn btn-primary">Return to Homepage</a>
+                <a th:href="@{/logout}" class="btn btn-outline">Logout</a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

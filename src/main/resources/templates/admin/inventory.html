@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin-layout :: admin-head('Inventory Management')}"></head>
+<body>
+
+<div class="admin-layout">
+    <div th:replace="~{fragments/admin-layout :: sidebar('inventory')}"></div>
+
+    <main class="admin-main">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h1 style="font-size: 1.75rem;">Inventory Management</h1>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Real-time warehouse stock tracking and instant replenishment</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <a th:href="@{/admin/inventory(lowStockOnly=false)}" class="btn btn-sm" th:classappend="${!isLowStockFilter ? 'btn-primary' : 'btn-outline'}">
+                    All Products
+                </a>
+                <a th:href="@{/admin/inventory(lowStockOnly=true)}" class="btn btn-sm" th:classappend="${isLowStockFilter ? 'btn-danger' : 'btn-outline'}">
+                    ⚠️ Low Stock Only (<span th:text="${lowStockCount}">0</span>)
+                </a>
+            </div>
+        </div>
+
+        <div th:if="${successMessage}" class="alert alert-success alert-auto-dismiss">
+            <span th:text="${successMessage}">Success</span>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger">
+            <span th:text="${errorMessage}">Error</span>
+        </div>
+
+        <!-- Filter Search Bar -->
+        <div class="card-box" style="padding: 1rem 1.25rem; margin-bottom: 1.5rem;" th:unless="${isLowStockFilter}">
+            <form th:action="@{/admin/inventory}" method="get" style="display: flex; gap: 1rem; align-items: center;">
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="Search stock by SKU, product name, or brand..." class="form-control" style="max-width: 400px;">
+                <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                <a th:href="@{/admin/inventory}" class="btn btn-outline btn-sm">Reset</a>
+            </form>
+        </div>
+
+        <!-- Inventory List Table -->
+        <div class="card-box" style="padding: 0; overflow: hidden;">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>SKU</th>
+                            <th>Product Name</th>
+                            <th>Category</th>
+                            <th>Current Stock</th>
+                            <th style="text-align: right;">Update Stock Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Low stock view -->
+                        <tr th:if="${isLowStockFilter}" th:each="p : ${lowStockProducts}">
+                            <td style="width: 50px;">
+                                <img th:src="${p.mainImageUrl}" th:alt="${p.name}" style="width: 40px; height: 40px; object-fit: cover; border-radius: var(--radius-sm);">
+                            </td>
+                            <td><code th:text="${p.sku}">SKU</code></td>
+                            <td>
+                                <strong style="color: var(--primary);" th:text="${p.name}">Product</strong>
+                            </td>
+                            <td th:text="${p.category.name}">Category</td>
+                            <td>
+                                <span class="badge badge-danger" th:text="${p.stock} + ' units'">0</span>
+                            </td>
+                            <td style="text-align: right;">
+                                <form th:action="@{/admin/inventory/update}" method="post" style="display: inline-flex; gap: 0.5rem; justify-content: flex-end;">
+                                    <input type="hidden" name="productId" th:value="${p.id}">
+                                    <input type="number" min="0" name="newStock" th:value="${p.stock}" class="form-control" style="width: 80px; text-align: center; padding: 0.35rem;" required>
+                                    <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                                </form>
+                            </td>
+                        </tr>
+
+                        <!-- All inventory paginated view -->
+                        <tr th:unless="${isLowStockFilter}" th:each="p : ${productPage.content}">
+                            <td style="width: 50px;">
+                                <img th:src="${p.mainImageUrl}" th:alt="${p.name}" style="width: 40px; height: 40px; object-fit: cover; border-radius: var(--radius-sm);">
+                            </td>
+                            <td><code th:text="${p.sku}">SKU</code></td>
+                            <td>
+                                <strong style="color: var(--primary);" th:text="${p.name}">Product</strong>
+                            </td>
+                            <td th:text="${p.category.name}">Category</td>
+                            <td>
+                                <span th:if="${p.stock > 10}" class="badge badge-success" th:text="${p.stock} + ' units'">15</span>
+                                <span th:if="${p.stock > 0 and p.stock <= 10}" class="badge badge-warning" th:text="${p.stock} + ' units (Low)'">5</span>
+                                <span th:if="${p.stock == 0}" class="badge badge-danger">Out of Stock</span>
+                            </td>
+                            <td style="text-align: right;">
+                                <form th:action="@{/admin/inventory/update}" method="post" style="display: inline-flex; gap: 0.5rem; justify-content: flex-end;">
+                                    <input type="hidden" name="productId" th:value="${p.id}">
+                                    <input type="number" min="0" name="newStock" th:value="${p.stock}" class="form-control" style="width: 80px; text-align: center; padding: 0.35rem;" required>
+                                    <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination for normal view -->
+        <div th:if="${!isLowStockFilter and productPage.totalPages > 1}" style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem;">
+            <a th:if="${productPage.hasPrevious()}" th:href="@{/admin/inventory(page=${productPage.number - 1}, keyword=${keyword})}" class="btn btn-outline btn-sm">← Previous</a>
+            <span style="display: flex; align-items: center; padding: 0 1rem; font-size: 0.85rem;" th:text="'Page ' + ${productPage.number + 1} + ' of ' + ${productPage.totalPages}">Page 1</span>
+            <a th:if="${productPage.hasNext()}" th:href="@{/admin/inventory(page=${productPage.number + 1}, keyword=${keyword})}" class="btn btn-outline btn-sm">Next →</a>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

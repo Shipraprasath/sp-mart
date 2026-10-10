@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin-layout :: admin-head('Manage Orders')}"></head>
+<body>
+
+<div class="admin-layout">
+    <div th:replace="~{fragments/admin-layout :: sidebar('orders')}"></div>
+
+    <main class="admin-main">
+        <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 1.75rem;">Order Lifecycle Management</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Review customer purchases, filter statuses, and oversee order fulfillment</p>
+        </div>
+
+        <!-- Filter Search Bar -->
+        <div class="card-box" style="padding: 1.25rem; margin-bottom: 1.5rem;">
+            <form th:action="@{/admin/orders}" method="get" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="Search Order #, customer name, or email..." class="form-control" style="flex: 1; min-width: 260px;">
+
+                <select name="status" class="form-control" style="width: 200px;">
+                    <option value="">All Statuses</option>
+                    <option th:each="st : ${allStatuses}" th:value="${st}" th:text="${st.displayName}" th:selected="${selectedStatus == st}"></option>
+                </select>
+
+                <button type="submit" class="btn btn-primary btn-sm">Filter Orders</button>
+                <a th:href="@{/admin/orders}" class="btn btn-outline btn-sm">Reset</a>
+            </form>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="card-box" style="padding: 0; overflow: hidden;">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Total Amount</th>
+                            <th>Payment</th>
+                            <th>Status</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${orderPage.empty}">
+                            <td colspan="7" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                                No orders matching the criteria found.
+                            </td>
+                        </tr>
+
+                        <tr th:unless="${orderPage.empty}" th:each="ord : ${orderPage.content}">
+                            <td>
+                                <a th:href="@{/admin/orders/{id}(id=${ord.id})}" style="font-weight: 700; color: var(--secondary);" th:text="${ord.orderNumber}">SPM-123</a>
+                            </td>
+                            <td>
+                                <strong style="color: var(--primary);" th:text="${ord.user.fullName}">Customer Name</strong><br>
+                                <span style="font-size: 0.75rem; color: var(--text-muted);" th:text="${ord.user.email}">email</span>
+                            </td>
+                            <td th:text="${#temporals.format(ord.createdAt, 'dd MMM yyyy, HH:mm')}">Date</td>
+                            <td style="font-weight: 700;" th:text="'₹' + ${#numbers.formatDecimal(ord.finalAmount, 1, 2)}">₹149.00</td>
+                            <td>
+                                <span th:text="${ord.paymentMethod.name()}">COD</span><br>
+                                <span th:if="${ord.paymentStatus.name() == 'PAID'}" class="badge badge-success" style="font-size: 0.65rem;">Paid</span>
+                                <span th:if="${ord.paymentStatus.name() == 'PENDING'}" class="badge badge-warning" style="font-size: 0.65rem;">Pending</span>
+                                <span th:if="${ord.paymentStatus.name() == 'REFUNDED'}" class="badge badge-secondary" style="font-size: 0.65rem;">Refunded</span>
+                            </td>
+                            <td>
+                                <span class="badge" th:classappend="${ord.orderStatus.name() == 'DELIVERED' ? 'badge-success' : (ord.orderStatus.name() == 'CANCELLED' ? 'badge-danger' : 'badge-primary')}"
+                                      th:text="${ord.orderStatus.displayName}">Status</span>
+                            </td>
+                            <td style="text-align: right;">
+                                <a th:href="@{/admin/orders/{id}(id=${ord.id})}" class="btn btn-outline btn-sm">Inspect Details</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div th:if="${orderPage.totalPages > 1}" style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem;">
+            <a th:if="${orderPage.hasPrevious()}" th:href="@{/admin/orders(page=${orderPage.number - 1}, keyword=${keyword}, status=${selectedStatus})}" class="btn btn-outline btn-sm">← Previous</a>
+            <span style="display: flex; align-items: center; padding: 0 1rem; font-size: 0.85rem;" th:text="'Page ' + ${orderPage.number + 1} + ' of ' + ${orderPage.totalPages}">Page 1</span>
+            <a th:if="${orderPage.hasNext()}" th:href="@{/admin/orders(page=${orderPage.number + 1}, keyword=${keyword}, status=${selectedStatus})}" class="btn btn-outline btn-sm">Next →</a>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

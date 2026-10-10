@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('My Wishlist')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: header-top}"></div>
+<header th:replace="~{fragments/layout :: header}"></header>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<main class="main-content">
+    <div class="container" style="padding-top: 2rem;">
+
+        <div style="display: flex; gap: 2.5rem; align-items: start;">
+
+            <!-- Account Sidebar Nav -->
+            <aside class="card-box" style="width: 250px; flex-shrink: 0;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">My Account</h3>
+                <nav style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem; font-weight: 600;">
+                    <a th:href="@{/account/profile}" style="color: var(--text-muted); padding: 0.4rem 0;">👤 Profile & Security</a>
+                    <a th:href="@{/account/orders}" style="color: var(--text-muted); padding: 0.4rem 0;">📦 Order History</a>
+                    <a th:href="@{/account/addresses}" style="color: var(--text-muted); padding: 0.4rem 0;">📍 Saved Addresses</a>
+                    <a th:href="@{/wishlist}" style="color: var(--secondary); padding: 0.4rem 0;">❤️ My Wishlist</a>
+                    <a th:href="@{/cart}" style="color: var(--text-muted); padding: 0.4rem 0;">🛒 Shopping Cart</a>
+                </nav>
+            </aside>
+
+            <!-- Wishlist Content -->
+            <div style="flex: 1;">
+                <div style="margin-bottom: 1.5rem;">
+                    <h1 style="font-size: 1.5rem;">My Wishlist</h1>
+                    <p style="color: var(--text-muted); font-size: 0.875rem;" th:text="${wishlist.size()} + ' saved items'">0 items</p>
+                </div>
+
+                <!-- Empty State -->
+                <div th:if="${#lists.isEmpty(wishlist)}" class="card-box" style="text-align: center; padding: 4rem 2rem;">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" style="margin: 0 auto 1rem auto;">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                    <h3 style="margin-bottom: 0.5rem;">Your wishlist is empty</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Save your favorite items so you don't lose track of them.</p>
+                    <a th:href="@{/products}" class="btn btn-primary">Start Exploring Products</a>
+                </div>
+
+                <!-- Wishlist Items Grid -->
+                <div th:unless="${#lists.isEmpty(wishlist)}" class="product-grid" style="margin-top: 0;">
+                    <div th:each="w : ${wishlist}" class="product-card">
+                        <!-- Remove button -->
+                        <form th:action="@{/wishlist/remove/{id}(id=${w.product.id})}" method="post">
+                            <button type="submit" class="card-wishlist-btn" title="Remove from Wishlist" style="color: var(--danger);">
+                                ✕
+                            </button>
+                        </form>
+
+                        <a th:href="@{/products/{id}(id=${w.product.id})}" class="card-image-box">
+                            <img th:src="${w.product.mainImageUrl}" th:alt="${w.product.name}">
+                        </a>
+
+                        <div class="card-content">
+                            <span class="card-brand" th:text="${w.product.brand}">Brand</span>
+                            <a th:href="@{/products/{id}(id=${w.product.id})}" class="card-title" th:text="${w.product.name}">Product Name</a>
+
+                            <div class="stock-tag">
+                                <span th:if="${w.product.isInStock()}" class="stock-in">● In Stock</span>
+                                <span th:unless="${w.product.isInStock()}" class="stock-out">● Out of Stock</span>
+                            </div>
+
+                            <div class="card-price-row">
+                                <span class="current-price" th:text="'₹' + ${#numbers.formatDecimal(w.product.getEffectivePrice(), 1, 2)}">₹99.00</span>
+                            </div>
+
+                            <form th:action="@{/wishlist/move-to-cart/{id}(id=${w.product.id})}" method="post" style="margin-top: 0.5rem;">
+                                <button type="submit" class="btn btn-primary btn-sm btn-block" th:disabled="${!w.product.isInStock()}">
+                                    Move to Cart
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

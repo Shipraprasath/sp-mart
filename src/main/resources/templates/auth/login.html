@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In — SP MART | Next-Gen Electronics</title>
+    <!-- Google Fonts: Outfit + Plus Jakarta Sans + JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+    <link rel="manifest" th:href="@{/manifest.json}">
+    <meta name="theme-color" content="#070B14">
+</head>
+<body>
+
+<div class="cyber-auth-root" id="auth-root" data-theme="dark">
+
+    <!-- Ambient Glowing Aurora Meshes -->
+    <div class="cyber-aurora-blob cyber-blob-1"></div>
+    <div class="cyber-aurora-blob cyber-blob-2"></div>
+    <div class="cyber-aurora-blob cyber-blob-3"></div>
+    <div class="cyber-grid-overlay"></div>
+
+    <!-- Theme Switcher Toggle Pill -->
+    <button type="button" class="cyber-theme-toggle" id="theme-toggle-btn" title="Toggle Dark / Light Theme">
+        <span id="theme-toggle-icon">☀️</span>
+        <span id="theme-toggle-text">Light Mode</span>
+    </button>
+
+    <!-- Master Glassmorphism Container -->
+    <div class="cyber-auth-container">
+
+        <!-- Left Showcase Panel (Hero Presentation) -->
+        <div class="cyber-showcase-panel">
+            <div>
+                <!-- Brand Identity -->
+                <a th:href="@{/}" class="cyber-brand-logo" title="Back to SP MART Storefront">
+                    <div class="cyber-logo-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
+                    </div>
+                    <div class="cyber-logo-text">SP<span>MART</span></div>
+                </a>
+
+                <h1 class="cyber-headline">
+                    Next-Gen Electronics.<br>
+                    <span class="gradient-text">Powered by AI.</span>
+                </h1>
+
+                <p class="cyber-desc">
+                    Experience intelligence-driven technology shopping. Verified customer reviews, transparent pricing, and instant AI product comparisons.
+                </p>
+
+                <!-- Project Capabilities -->
+                <div class="cyber-feature-list">
+                    <div class="cyber-feature-item">
+                        <div class="cyber-feature-dot">✓</div>
+                        <span>Catalog-Grounded AI Shopping Assistant</span>
+                    </div>
+                    <div class="cyber-feature-item">
+                        <div class="cyber-feature-dot">✓</div>
+                        <span>Multi-Role Access: Buyer, Seller & Administrator</span>
+                    </div>
+                    <div class="cyber-feature-item">
+                        <div class="cyber-feature-dot">✓</div>
+                        <span>Enterprise Spring Security 6 & BCrypt Protection</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal Status Footer -->
+            <div class="cyber-showcase-footer">
+                <div class="cyber-status-light"></div>
+                <span>SYSTEM_STATUS: ONLINE (JAVA 21 LTS)</span>
+            </div>
+        </div>
+
+        <!-- Right Authentication Panel -->
+        <div class="cyber-auth-panel">
+
+            <div class="cyber-auth-header">
+                <h2 class="cyber-auth-title">Welcome Back</h2>
+                <p class="cyber-auth-subtitle">Select your account tier or enter your credentials.</p>
+            </div>
+
+            <!-- Feedback Alerts -->
+            <div th:if="${loginError}" class="alert alert-danger" style="margin-bottom: 1.25rem; font-size: 0.85rem;" role="alert">
+                <span th:text="${loginError}">Invalid email or password.</span>
+            </div>
+            <div th:if="${logoutMessage}" class="alert alert-success" style="margin-bottom: 1.25rem; font-size: 0.85rem;" role="alert">
+                <span th:text="${logoutMessage}">You have been logged out securely.</span>
+            </div>
+
+            <!-- Interactive 3-Role Switcher -->
+            <div class="cyber-role-group">
+                <div class="cyber-role-header">
+                    <span>Access Tier</span>
+                    <span style="font-size: 0.7rem; color: #22D3EE;">1-Click Demo Fill</span>
+                </div>
+                <div class="cyber-role-tabs">
+                    <!-- Buyer -->
+                    <button type="button" class="cyber-role-tab active" id="tab-buyer"
+                            onclick="selectRole('buyer', 'buyer@spmart.com', 'Buyer@123')">
+                        <div class="role-icon-box">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <path d="M16 10a4 4 0 0 1-8 0"></path>
+                            </svg>
+                        </div>
+                        <span class="role-label-text">Buyer</span>
+                    </button>
+
+                    <!-- Seller -->
+                    <button type="button" class="cyber-role-tab" id="tab-seller"
+                            onclick="selectRole('seller', 'seller1@spmart.com', 'Seller@123')">
+                        <div class="role-icon-box">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                            </svg>
+                        </div>
+                        <span class="role-label-text">Seller</span>
+                    </button>
+
+                    <!-- Admin -->
+                    <button type="button" class="cyber-role-tab" id="tab-admin"
+                            onclick="selectRole('admin', 'admin@spmart.com', 'Admin@123')">
+                        <div class="role-icon-box">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                        </div>
+                        <span class="role-label-text">Admin</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sign-In Form -->
+            <form th:action="@{/login}" method="post" id="login-form">
+                
+                <!-- Email Field -->
+                <div class="cyber-field">
+                    <label class="cyber-label" for="email">Email Address</label>
+                    <div class="cyber-input-wrapper">
+                        <div class="cyber-input-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                            </svg>
+                        </div>
+                        <input type="email" id="email" name="email" class="cyber-input"
+                               placeholder="user@spmart.com" value="buyer@spmart.com" required autofocus>
+                    </div>
+                </div>
+
+                <!-- Password Field -->
+                <div class="cyber-field" style="margin-bottom: 0.85rem;">
+                    <label class="cyber-label" for="password">Password</label>
+                    <div class="cyber-input-wrapper">
+                        <div class="cyber-input-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                        </div>
+                        <input type="password" id="password" name="password" class="cyber-input"
+                               placeholder="Enter your password" value="Buyer@123" required>
+                        <button type="button" id="pwd-toggle-btn" class="cyber-toggle-eye" onclick="togglePasswordVisibility()" title="Toggle visibility">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="eye-icon">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Remember & Forgot helper -->
+                <div class="cyber-helper-row">
+                    <label class="cyber-remember">
+                        <input type="checkbox" name="remember-me" style="accent-color: #22D3EE;">
+                        <span>Remember Me</span>
+                    </label>
+                    <a th:href="@{/forgot-password}" class="cyber-forgot-link">Forgot Password?</a>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="cyber-btn-submit">
+                    <span>Sign In to Terminal</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+            </form>
+
+            <!-- Navigation Links -->
+            <div class="cyber-auth-bottom">
+                <div style="margin-bottom: 0.65rem;">
+                    Don't have an account? <a th:href="@{/register}">Create Account</a>
+                </div>
+                <div style="font-size: 0.8rem; color: #64748B;">
+                    Merchant partner? <a th:href="@{/seller/register}">Register as Seller</a> &bull; <a th:href="@{/}">Storefront</a>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Interactive Client-side Script -->
+<script>
+    function selectRole(role, email, pass) {
+        document.querySelectorAll('.cyber-role-tab').forEach(t => t.classList.remove('active'));
+        const tab = document.getElementById('tab-' + role);
+        if (tab) tab.classList.add('active');
+
+        const emailInp = document.getElementById('email');
+        const passInp = document.getElementById('password');
+        if (emailInp && passInp) {
+            emailInp.value = email;
+            passInp.value = pass;
+        }
+    }
+
+    function togglePasswordVisibility() {
+        const pass = document.getElementById('password');
+        const eye = document.getElementById('eye-icon');
+        if (pass) {
+            if (pass.type === 'password') {
+                pass.type = 'text';
+                eye.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+            } else {
+                pass.type = 'password';
+                eye.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+            }
+        }
+    }
+
+    // Theme Switcher Toggle
+    const themeBtn = document.getElementById('theme-toggle-btn');
+    const authRoot = document.getElementById('auth-root');
+    const themeIcon = document.getElementById('theme-toggle-icon');
+    const themeText = document.getElementById('theme-toggle-text');
+
+    const savedTheme = localStorage.getItem('spmart_auth_theme') || 'dark';
+    applyTheme(savedTheme);
+
+    themeBtn.addEventListener('click', () => {
+        const currentTheme = authRoot.getAttribute('data-theme');
+        const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        applyTheme(nextTheme);
+    });
+
+    function applyTheme(theme) {
+        authRoot.setAttribute('data-theme', theme);
+        localStorage.setItem('spmart_auth_theme', theme);
+        if (theme === 'dark') {
+            themeIcon.textContent = '☀️';
+            themeText.textContent = 'Light Mode';
+        } else {
+            themeIcon.textContent = '🌙';
+            themeText.textContent = 'Cyber Dark';
+        }
+    }
+</script>
+
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

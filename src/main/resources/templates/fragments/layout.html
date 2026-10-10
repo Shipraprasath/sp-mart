@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title != null ? title + ' | SP MART — Smart Electronics Shopping' : 'SP MART — Premium Electronics Shopping'}">SP MART — Premium Electronics Shopping</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+    <link rel="manifest" th:href="@{/manifest.json}">
+    <meta name="theme-color" content="#4F67EB">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="SP Mart">
+    <link rel="apple-touch-icon" th:href="@{/images/icons/icon-192.png}">
+</head>
+<body>
+
+<!-- Announcement Bar (Section 6.A) -->
+<div class="announcement-bar" th:fragment="announcement-bar">
+    <div class="container">
+        <div>
+            <span class="announcement-tag">⚡ PROMO</span>
+            <span>SMARTER TECH. BETTER CHOICES. EXPLORE SP MART TODAY.</span>
+        </div>
+        <div style="display: flex; gap: 1.25rem; align-items: center; font-size: 0.775rem;">
+            <span>Free Delivery On Orders Over ₹500</span>
+            <span sec:authorize="hasRole('ADMIN')">
+                <a th:href="@{/admin/dashboard}" style="color: var(--cyan-highlight); font-weight: 700;">★ Admin Portal</a>
+            </span>
+            <span sec:authorize="hasRole('SELLER')">
+                <a th:href="@{/seller/dashboard}" style="color: var(--cyan-highlight); font-weight: 700;">★ Seller Dashboard</a>
+            </span>
+            <span sec:authorize="isAnonymous()">
+                <a th:href="@{/seller/register}" style="color: #94A3B8;">Become a Seller</a>
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Header-top alias for templates -->
+<div th:fragment="header-top" th:replace="~{fragments/layout :: announcement-bar}"></div>
+
+<!-- Sticky Site Header (Section 6.B) -->
+<header class="site-header" th:fragment="header">
+    <div class="container">
+        <div class="header-main">
+            <!-- Brand Logo -->
+            <a th:href="@{/}" class="brand-logo">
+                <div class="brand-icon-box">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                </div>
+                <span>SP <span class="brand-accent-text">MART</span></span>
+            </a>
+
+            <!-- Search Bar -->
+            <div class="header-search">
+                <form th:action="@{/products}" method="get" class="search-form">
+                    <input type="text" name="keyword" th:value="${keyword}" placeholder="Search smartphones, laptops, 4K TVs, appliances..." class="search-input" required>
+                    <button type="submit" class="search-btn" aria-label="Search">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="header-actions">
+                <!-- Wishlist -->
+                <a th:href="@{/wishlist}" class="action-item" title="My Wishlist">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                    <span class="badge-counter" th:text="${wishlistItemCount}">0</span>
+                </a>
+
+                <!-- Cart -->
+                <a th:href="@{/cart}" class="action-item" title="Shopping Cart">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                    <span class="badge-counter" th:text="${cartItemCount}">0</span>
+                </a>
+
+                <!-- PWA Install Button (Displays when installable on mobile/desktop) -->
+                <button type="button" class="btn btn-outline btn-sm pwa-install-trigger" style="display: none; align-items: center; gap: 0.35rem; border-color: var(--electric-blue); color: var(--electric-blue);" title="Install SP MART App on your device">
+                    <span>📲</span> <span>Install App</span>
+                </button>
+
+                <!-- User Account / Login -->
+                <div sec:authorize="isAuthenticated()" style="display: flex; align-items: center; gap: 0.85rem;">
+                    <a th:href="@{/account/profile}" class="action-item" style="color: var(--electric-blue);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        <span th:text="${currentUser != null ? currentUser.fullName : 'Account'}">Account</span>
+                    </a>
+                    <a th:href="@{/logout}" class="btn btn-outline btn-sm" title="Logout">Logout</a>
+                </div>
+
+                <div sec:authorize="isAnonymous()" style="display: flex; gap: 0.5rem; align-items: center;">
+                    <a th:href="@{/login}" class="btn btn-primary btn-sm">Sign In</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Nav Strip -->
+    <nav class="nav-categories">
+        <div class="container">
+            <div class="cat-strip-inner">
+                <a th:href="@{/products}" class="cat-nav-link" th:classappend="${selectedCategory == null ? 'active' : ''}">All Electronics</a>
+                <th:block th:each="cat : ${navbarCategories}">
+                    <a th:href="@{/products/category/{slug}(slug=${cat.slug})}"
+                       class="cat-nav-link"
+                       th:classappend="${selectedCategory == cat.id ? 'active' : ''}"
+                       th:text="${cat.name}">Category</a>
+                </th:block>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<!-- Flash Alerts Fragment -->
+<div th:fragment="alerts" class="container" style="margin-top: 1rem;">
+    <div th:if="${successMessage}" class="alert alert-success alert-auto-dismiss" role="alert">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span th:utext="${successMessage}">Success operation completed.</span>
+        </div>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <span th:utext="${errorMessage}">An error occurred.</span>
+        </div>
+    </div>
+</div>
+
+<!-- Floating AI Shopping Assistant (Section 10) -->
+<div th:fragment="ai-assistant">
+    <!-- Floating Trigger Button -->
+    <button type="button" class="ai-assistant-toggle-btn" id="ai-assistant-toggle" title="Ask SP MART AI Shopping Assistant" aria-label="AI Shopping Assistant">
+        <div class="ai-pulse-ring"></div>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+            <circle cx="12" cy="5" r="2"></circle>
+            <path d="M12 7v4"></path>
+            <line x1="8" y1="16" x2="8" y2="16"></line>
+            <line x1="16" y1="16" x2="16" y2="16"></line>
+        </svg>
+    </button>
+
+    <!-- Slide-Up Chat Window -->
+    <div class="ai-assistant-modal" id="ai-assistant-modal">
+        <div class="ai-header">
+            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <div style="width: 32px; height: 32px; background: rgba(34, 211, 238, 0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--cyan-highlight);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path></svg>
+                </div>
+                <div>
+                    <strong style="display: block; font-size: 0.95rem; font-family: var(--font-heading);">SP MART AI Assistant</strong>
+                    <span style="font-size: 0.725rem; color: var(--cyan-highlight);">Catalog-Grounded Intelligence</span>
+                </div>
+            </div>
+            <button type="button" id="ai-assistant-close" style="background: none; border: none; color: #FFFFFF; font-size: 1.25rem; cursor: pointer;">✕</button>
+        </div>
+
+        <div class="ai-messages-container" id="ai-chat-messages">
+            <div class="ai-msg ai-msg-assistant">
+                Hi! I'm your SP MART shopping assistant. Tell me your budget, preferred brand, or the device you're looking for.
+            </div>
+        </div>
+
+        <div class="ai-chips-container" id="ai-chips">
+            <button type="button" class="ai-chip">Best phone under ₹30,000</button>
+            <button type="button" class="ai-chip">MacBook vs Dell laptop</button>
+            <button type="button" class="ai-chip">Recommend 55-inch TV</button>
+            <button type="button" class="ai-chip">Best noise cancelling headphones</button>
+        </div>
+
+        <form class="ai-input-wrapper" id="ai-chat-form">
+            <input type="text" id="ai-chat-input" class="ai-input" placeholder="Ask about phones, laptops, TVs, specs..." autocomplete="off">
+            <button type="submit" class="btn btn-primary btn-sm" style="padding: 0.5rem 0.9rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Global Deep Navy Footer (Section 6.M) -->
+<footer class="site-footer" th:fragment="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div>
+                <a th:href="@{/}" class="brand-logo brand-logo-light" style="margin-bottom: 1.25rem;">
+                    <div class="brand-icon-box">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    </div>
+                    <span>SP <span class="brand-accent-text" style="color: var(--cyan-highlight);">MART</span></span>
+                </a>
+                <p style="font-size: 0.875rem; line-height: 1.6; margin-bottom: 1.25rem; color: #94A3B8;">
+                    Next-generation technology shopping powered by artificial intelligence. Curated electronics, transparent pricing, verified customer reviews, and fast fulfillment.
+                </p>
+                <div style="font-size: 0.8rem; color: #64748B;">
+                    <strong>B.Tech AI & Data Science Capstone Project</strong><br>
+                    Enterprise Java 21 LTS · Spring Boot 3 · Spring Security 6
+                </div>
+            </div>
+
+            <div>
+                <h4 class="footer-heading">Shop Electronics</h4>
+                <ul class="footer-links">
+                    <li><a th:href="@{/products/category/smartphones}">Smartphones</a></li>
+                    <li><a th:href="@{/products/category/laptops-computers}">Laptops & Computers</a></li>
+                    <li><a th:href="@{/products/category/televisions}">Televisions</a></li>
+                    <li><a th:href="@{/products/category/air-conditioners}">Air Conditioners</a></li>
+                    <li><a th:href="@{/products/category/speakers}">Audio & Speakers</a></li>
+                    <li><a th:href="@{/products/category/smart-home-devices}">Smart-Home Devices</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="footer-heading">Customer Support</h4>
+                <ul class="footer-links">
+                    <li><a th:href="@{/account/orders}">Track My Order</a></li>
+                    <li><a th:href="@{/cart}">Shopping Cart</a></li>
+                    <li><a th:href="@{/wishlist}">My Wishlist</a></li>
+                    <li><a th:href="@{/account/addresses}">Delivery Addresses</a></li>
+                    <li><a th:href="@{/account/profile}">Account Security</a></li>
+                    <li><a th:href="@{/seller/register}">Sell on SP MART</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="footer-heading">SP MART & Security</h4>
+                <ul class="footer-links">
+                    <li><a href="javascript:void(0);">100% Genuine Electronics</a></li>
+                    <li><a href="javascript:void(0);">UPI & Cash on Delivery</a></li>
+                    <li><a href="javascript:void(0);">Safe & Secure Checkout</a></li>
+                    <li><a href="javascript:void(0);">Privacy Policy</a></li>
+                    <li><a href="javascript:void(0);">Terms of Service</a></li>
+                    <li><a th:href="@{/login}">Demo Account Login</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 SP MART Electronics E-Commerce. All rights reserved.</p>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <span style="color: #64748B; font-size: 0.775rem;">Supported Payments:</span>
+                <span class="badge badge-secondary" style="font-size: 0.7rem;">UPI</span>
+                <span class="badge badge-secondary" style="font-size: 0.7rem;">Google Pay</span>
+                <span class="badge badge-secondary" style="font-size: 0.7rem;">Paytm</span>
+                <span class="badge badge-secondary" style="font-size: 0.7rem;">COD</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inject AI Floating Assistant Fragment -->
+    <div th:replace="~{fragments/layout :: ai-assistant}"></div>
+
+    <script th:src="@{/js/main.js}"></script>
+</footer>
+
+</body>
+</html>

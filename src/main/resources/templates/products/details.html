@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head(${product.name})}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: header-top}"></div>
+<header th:replace="~{fragments/layout :: header}"></header>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<main class="main-content">
+    <div class="container" style="padding-top: 2rem; max-width: 1240px;">
+
+        <!-- Product Main Showcase -->
+        <div style="display: grid; grid-template-columns: 1fr 1.25fr; gap: 3.5rem; margin-bottom: 3.5rem; align-items: start;">
+
+            <!-- Product Image Showcase -->
+            <div>
+                <div class="card-box" style="padding: 2rem; overflow: hidden; text-align: center; background-color: #ffffff; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-color);">
+                    <img th:src="${product.mainImageUrl}" th:alt="${product.name}" id="mainProductImg"
+                         style="max-height: 440px; width: 100%; object-fit: contain; margin: 0 auto;">
+                </div>
+            </div>
+
+            <!-- Product Specs & Purchase Options -->
+            <div>
+                <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap;">
+                    <span class="badge badge-primary" th:text="${product.category.name}">Category</span>
+                    <span class="badge badge-secondary" th:if="${product.modelNumber}" th:text="'Model: ' + ${product.modelNumber}">Model</span>
+                    <span class="badge" style="background: #e2e8f0; color: #334155;" th:text="'SKU: ' + ${product.sku}">SKU</span>
+                    <span th:if="${product.featured}" class="badge badge-success">Featured Deal</span>
+                </div>
+
+                <h1 style="font-size: 2.15rem; font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem; line-height: 1.25;" th:text="${product.name}">Product Name</h1>
+
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 0.25rem; color: #f59e0b; font-size: 1.1rem;">
+                        <span>★</span>
+                        <strong th:text="${product.averageRating}">4.8</strong>
+                    </div>
+                    <span style="color: var(--text-muted); font-size: 0.9rem;" th:text="${product.reviewCount} + ' Verified Ratings'">12 Verified Ratings</span>
+                    <span style="color: var(--border-color);">|</span>
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Brand: <strong th:text="${product.brand}" style="color: var(--primary);">Brand</strong></span>
+                    <span style="color: var(--border-color);">|</span>
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">
+                        Sold By: <strong style="color: var(--secondary);" th:text="${product.getSellerName()}">SP-Mart Direct</strong>
+                    </span>
+                </div>
+
+                <!-- Price Box -->
+                <div style="background-color: #f8fafc; padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; border: 1px solid var(--border-color);">
+                    <div style="display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap;">
+                        <span style="font-size: 2.5rem; font-weight: 800; color: var(--primary);"
+                              th:text="'₹' + ${#numbers.formatDecimal(product.getEffectivePrice(), 1, 2)}">₹49,999.00</span>
+                        <span th:if="${product.hasDiscount()}" style="font-size: 1.35rem; color: var(--text-light); text-decoration: line-through;"
+                              th:text="'₹' + ${#numbers.formatDecimal(product.price, 1, 2)}">₹59,999.00</span>
+                        <span th:if="${product.hasDiscount()}" class="badge badge-danger" style="font-size: 0.85rem;" th:text="'Save ' + ${product.getDiscountPercentage()} + '%'">Save 15%</span>
+                    </div>
+                    <div style="font-size: 0.825rem; color: var(--text-muted); margin-top: 0.35rem;">Inclusive of GST, import duty, and manufacturer standard warranty</div>
+                </div>
+
+                <!-- Stock Availability -->
+                <div style="margin-bottom: 1.5rem;">
+                    <div th:if="${product.stock > 10}" class="badge badge-success" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">
+                        ✓ In Stock & Ready to Dispatch
+                    </div>
+                    <div th:if="${product.stock > 0 and product.stock <= 10}" class="badge badge-warning" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;"
+                         th:text="'⚠ Only ' + ${product.stock} + ' units left in stock!'">
+                        ⚠ Low Stock
+                    </div>
+                    <div th:if="${product.stock == 0}" class="badge badge-danger" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">
+                        ✕ Currently Out of Stock
+                    </div>
+                </div>
+
+                <!-- Description Snippet -->
+                <p style="color: var(--text-secondary); line-height: 1.7; margin-bottom: 2rem; font-size: 0.95rem;" th:text="${product.description}">
+                    Product description details...
+                </p>
+
+                <!-- Add to Cart / Wishlist Actions -->
+                <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 2rem; flex-wrap: wrap;">
+                    <form th:action="@{/cart/add}" method="post" style="display: flex; gap: 0.75rem; align-items: center;">
+                        <input type="hidden" name="productId" th:value="${product.id}">
+                        
+                        <div class="qty-control-wrapper" style="display: flex; align-items: center; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: white;">
+                            <button type="button" class="btn btn-outline qty-btn-minus" style="border: none; padding: 0.65rem 0.85rem;">-</button>
+                            <input type="number" name="quantity" value="1" min="1" th:max="${product.stock}" class="qty-input"
+                                   style="width: 50px; text-align: center; border: none; font-weight: 700; outline: none;">
+                            <button type="button" class="btn btn-outline qty-btn-plus" style="border: none; padding: 0.65rem 0.85rem;">+</button>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg" th:disabled="${!product.isInStock()}">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="9" cy="21" r="1"></circle>
+                                <circle cx="20" cy="21" r="1"></circle>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                            </svg>
+                            <span>Add to Cart</span>
+                        </button>
+                    </form>
+
+                    <form th:action="@{/wishlist/add/{id}(id=${product.id})}" method="post">
+                        <button type="submit" class="btn btn-outline btn-lg" title="Save to Wishlist">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                            <span th:text="${inWishlist ? 'Saved in Wishlist' : 'Add to Wishlist'}">Add to Wishlist</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Trust Guarantee Box -->
+                <div style="border-top: 1px solid var(--border-color); padding-top: 1.25rem; display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; font-size: 0.85rem; color: var(--text-muted);">
+                    <div>🛡 <strong>100% Genuine Tech</strong> Manufacturer Authorized</div>
+                    <div>🚚 <strong>Express Delivery</strong> Dispatched within 24h</div>
+                    <div>💳 <strong>Secure Payments</strong> UPI, GPay, Cards & COD</div>
+                    <div>🔄 <strong>7-Day Replacement</strong> Guaranteed Support</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Specifications Table Section -->
+        <section th:if="${product.specifications != null and !product.specifications.isEmpty()}" class="card-box" style="margin-bottom: 3.5rem; border-radius: var(--radius-lg);">
+            <div class="card-box-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1.25rem;">
+                <h2 style="font-size: 1.35rem; color: var(--primary);">Technical Specifications</h2>
+                <span class="badge badge-cyan" style="font-size: 0.75rem;">Verified Hardware Specs</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table" style="margin-bottom: 0;">
+                    <tbody>
+                        <tr th:each="specItem : ${#strings.arraySplit(product.specifications, '|')}">
+                            <th style="width: 250px; background-color: #f8fafc; color: var(--deep-blue); font-weight: 600; font-size: 0.875rem;"
+                                th:text="${#strings.contains(specItem, ':') ? #strings.arraySplit(specItem, ':')[0].trim() : 'Feature'}">Specification</th>
+                            <td style="font-size: 0.875rem; color: var(--text-primary);"
+                                th:text="${#strings.contains(specItem, ':') ? #strings.substringAfter(specItem, ':').trim() : specItem.trim()}">Specification detail value</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Customer Reviews Section -->
+        <section class="card-box" style="margin-bottom: 3.5rem; border-radius: var(--radius-lg);">
+            <div class="card-box-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1.25rem;">
+                <div>
+                    <h2 style="font-size: 1.35rem; color: var(--primary);">Customer Ratings & Reviews</h2>
+                    <p style="color: var(--text-muted); font-size: 0.875rem;" th:text="'Overall rating ' + ${product.averageRating} + ' out of 5 based on ' + ${product.reviewCount} + ' reviews'">4.8 / 5</p>
+                </div>
+            </div>
+
+            <!-- Review Submission Form for Authenticated Customers -->
+            <div sec:authorize="isAuthenticated()" th:if="${canReview}" style="background-color: #f8fafc; padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 2rem; border: 1px solid var(--border-color);">
+                <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--primary);">Share Your Experience</h3>
+                <form th:action="@{/products/{id}/review(id=${product.id})}" method="post">
+                    <div style="display: grid; grid-template-columns: 180px 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Rating</label>
+                            <select name="rating" class="form-control" required>
+                                <option value="5">★★★★★ (5 Stars)</option>
+                                <option value="4">★★★★☆ (4 Stars)</option>
+                                <option value="3">★★★☆☆ (3 Stars)</option>
+                                <option value="2">★★☆☆☆ (2 Stars)</option>
+                                <option value="1">★☆☆☆☆ (1 Star)</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Headline</label>
+                            <input type="text" name="title" placeholder="Summarize your review in a few words" class="form-control" required maxlength="150">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label class="form-label">Review Details</label>
+                        <textarea name="comment" rows="3" placeholder="What did you like or dislike? How does it perform day-to-day?" class="form-control" required maxlength="2000"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">Submit Review</button>
+                </form>
+            </div>
+
+            <div sec:authorize="isAnonymous()" style="background-color: #f1f5f9; padding: 1rem 1.5rem; border-radius: var(--radius-md); margin-bottom: 2rem;">
+                <span style="font-size: 0.9rem;">Have you purchased this product? <a th:href="@{/login}" style="color: var(--secondary); font-weight: 600;">Sign in to share your verified review.</a></span>
+            </div>
+
+            <!-- Existing Reviews List -->
+            <div th:if="${#lists.isEmpty(reviews)}" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                <p>No customer reviews yet for this product. Be the first to rate it!</p>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(reviews)}">
+                <div th:each="rev : ${reviews}" style="border-bottom: 1px solid var(--border-color); padding: 1.25rem 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <strong th:text="${rev.user.fullName}">Customer Name</strong>
+                            <span class="badge badge-success" style="font-size: 0.7rem;">Verified Buyer</span>
+                        </div>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);" th:text="${#temporals.format(rev.createdAt, 'dd MMM yyyy')}">01 Oct 2026</span>
+                    </div>
+
+                    <div style="color: #f59e0b; margin-bottom: 0.35rem; font-size: 0.9rem;">
+                        <span th:text="${'★'.repeat(rev.rating)}">★★★★★</span>
+                        <strong style="color: var(--primary); margin-left: 0.5rem;" th:text="${rev.title}">Review Title</strong>
+                    </div>
+
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;" th:text="${rev.comment}">Review comment text...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Related Products Grid -->
+        <section th:if="${not #lists.isEmpty(relatedProducts)}" style="margin-bottom: 3.5rem;">
+            <h2 style="margin-bottom: 1.5rem; font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; color: var(--primary);">Related Products in this Category</h2>
+            <div class="product-grid">
+                <div th:each="p : ${relatedProducts}" class="product-card">
+                    <form th:action="@{/wishlist/add/{id}(id=${p.id})}" method="post">
+                        <button type="submit" class="card-wishlist-btn" title="Save to Wishlist">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </button>
+                    </form>
+
+                    <a th:href="@{/products/{id}(id=${p.id})}" class="card-image-box">
+                        <img th:src="${p.mainImageUrl}" th:alt="${p.name}">
+                    </a>
+
+                    <div class="card-content">
+                        <span class="card-brand" th:text="${p.brand}">Brand</span>
+                        <a th:href="@{/products/{id}(id=${p.id})}" class="card-title" th:text="${p.name}">Product Name</a>
+                        <div class="card-price-row">
+                            <span class="current-price" th:text="'₹' + ${#numbers.formatDecimal(p.getEffectivePrice(), 1, 2)}">₹999.00</span>
+                        </div>
+                        <a th:href="@{/products/{id}(id=${p.id})}" class="btn btn-outline btn-sm btn-block">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

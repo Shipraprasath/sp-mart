@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Server Error (500)')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: header-top}"></div>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="main-content">
+    <div class="container" style="max-width: 600px; padding: 5rem 1rem; text-align: center;">
+        <div style="font-size: 5rem; font-weight: 800; color: var(--warning); line-height: 1;">500</div>
+        <h1 style="font-size: 2rem; margin: 1rem 0 0.5rem 0;">Internal Server Error</h1>
+        <p style="color: var(--text-muted); font-size: 1rem; margin-bottom: 2rem;">
+            An unexpected error occurred while processing your request. Please try again or return to our homepage.
+        </p>
+        <div style="display: flex; justify-content: center; gap: 1rem;">
+            <a th:href="@{/}" class="btn btn-primary">Return to Homepage</a>
+            <a th:href="@{/products}" class="btn btn-outline">Browse Catalog</a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Account Profile')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: header-top}"></div>
+<header th:replace="~{fragments/layout :: header}"></header>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<main class="main-content">
+    <div class="container" style="padding-top: 2rem;">
+
+        <div style="display: flex; gap: 2.5rem; align-items: start;">
+
+            <!-- Account Sidebar Nav -->
+            <aside class="card-box" style="width: 250px; flex-shrink: 0;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">My Account</h3>
+                <nav style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem; font-weight: 600;">
+                    <a th:href="@{/account/profile}" style="color: var(--secondary); padding: 0.4rem 0;">👤 Profile & Security</a>
+                    <a th:href="@{/account/orders}" style="color: var(--text-muted); padding: 0.4rem 0;">📦 Order History</a>
+                    <a th:href="@{/account/addresses}" style="color: var(--text-muted); padding: 0.4rem 0;">📍 Saved Addresses</a>
+                    <a th:href="@{/wishlist}" style="color: var(--text-muted); padding: 0.4rem 0;">❤️ My Wishlist</a>
+                    <a th:href="@{/cart}" style="color: var(--text-muted); padding: 0.4rem 0;">🛒 Shopping Cart</a>
+                </nav>
+            </aside>
+
+            <!-- Profile Forms -->
+            <div style="flex: 1;">
+
+                <!-- Profile Success/Error Alerts -->
+                <div th:if="${profileSuccess}" class="alert alert-success alert-auto-dismiss">
+                    <span th:text="${profileSuccess}">Profile updated</span>
+                </div>
+                <div th:if="${passwordSuccess}" class="alert alert-success alert-auto-dismiss">
+                    <span th:text="${passwordSuccess}">Password updated</span>
+                </div>
+                <div th:if="${passwordError}" class="alert alert-danger">
+                    <span th:text="${passwordError}">Password error</span>
+                </div>
+
+                <!-- Update Personal Details -->
+                <div class="card-box">
+                    <div class="card-box-header">
+                        <h3>Personal Information</h3>
+                    </div>
+
+                    <form th:action="@{/account/profile}" th:object="${profileDto}" method="post">
+                        <div class="form-group">
+                            <label class="form-label">Email Address (Read-only)</label>
+                            <input type="email" class="form-control" th:value="${user.email}" disabled style="background-color: #f1f5f9;">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="fullName">Full Name</label>
+                            <input type="text" id="fullName" th:field="*{fullName}" class="form-control" required>
+                            <span class="form-text-error" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="phone">Mobile Phone</label>
+                            <input type="tel" id="phone" th:field="*{phone}" class="form-control" required maxlength="10">
+                            <span class="form-text-error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-sm">Save Profile Changes</button>
+                    </form>
+                </div>
+
+                <!-- Change Password Form -->
+                <div class="card-box">
+                    <div class="card-box-header">
+                        <h3>Change Password</h3>
+                    </div>
+
+                    <form th:action="@{/account/change-password}" th:object="${passwordDto}" method="post">
+                        <div class="form-group">
+                            <label class="form-label" for="currentPassword">Current Password</label>
+                            <input type="password" id="currentPassword" th:field="*{currentPassword}" class="form-control" required>
+                            <span class="form-text-error" th:if="${#fields.hasErrors('currentPassword')}" th:errors="*{currentPassword}"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="newPassword">New Password</label>
+                            <input type="password" id="newPassword" th:field="*{newPassword}" class="form-control" required>
+                            <span class="form-text-error" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="confirmPassword">Confirm New Password</label>
+                            <input type="password" id="confirmPassword" th:field="*{confirmPassword}" class="form-control" required>
+                            <span class="form-text-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-sm">Update Password</button>
+                    </form>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

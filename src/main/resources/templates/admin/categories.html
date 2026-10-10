@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin-layout :: admin-head('Manage Categories')}"></head>
+<body>
+
+<div class="admin-layout">
+    <div th:replace="~{fragments/admin-layout :: sidebar('categories')}"></div>
+
+    <main class="admin-main">
+        <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 1.75rem;">Category Management</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Organize product taxonomy and shopping navigation</p>
+        </div>
+
+        <div th:if="${successMessage}" class="alert alert-success alert-auto-dismiss">
+            <span th:text="${successMessage}">Success</span>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger">
+            <span th:text="${errorMessage}">Error</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 340px; gap: 2rem; align-items: start;">
+
+            <!-- Category List Table -->
+            <div class="card-box" style="padding: 0; overflow: hidden;">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Order</th>
+                                <th>Category Name</th>
+                                <th>Slug</th>
+                                <th>Products</th>
+                                <th>Status</th>
+                                <th style="text-align: right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="c : ${categories}">
+                                <td th:text="${c.displayOrder}">1</td>
+                                <td>
+                                    <strong style="color: var(--primary);" th:text="${c.name}">Electronics</strong>
+                                </td>
+                                <td><code th:text="${c.slug}">electronics</code></td>
+                                <td th:text="${c.products.size()} + ' items'">4 items</td>
+                                <td>
+                                    <span th:if="${c.active}" class="badge badge-success">Active</span>
+                                    <span th:unless="${c.active}" class="badge badge-secondary">Inactive</span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <form th:action="@{/admin/categories/delete/{id}(id=${c.id})}" method="post" style="display: inline;">
+                                        <button type="submit" class="btn btn-outline btn-sm" style="color: var(--danger);"
+                                                onclick="return confirm('Are you sure you want to delete this category?')"
+                                                th:disabled="${!c.products.isEmpty()}">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Create Category Form Box -->
+            <div class="card-box">
+                <h3 style="font-size: 1.15rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                    Add New Category
+                </h3>
+
+                <form th:action="@{/admin/categories/new}" th:object="${categoryDto}" method="post">
+                    <div class="form-group">
+                        <label class="form-label" for="catName">Category Name</label>
+                        <input type="text" id="catName" th:field="*{name}" class="form-control" placeholder="E.g., Gaming Consoles" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="catDesc">Description</label>
+                        <textarea id="catDesc" th:field="*{description}" rows="2" class="form-control" placeholder="Short description..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="catImg">Banner Image URL</label>
+                        <input type="url" id="catImg" th:field="*{imageUrl}" class="form-control" placeholder="https://...">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="catOrder">Display Priority Order</label>
+                        <input type="number" id="catOrder" th:field="*{displayOrder}" class="form-control" value="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" th:field="*{active}" checked>
+                            <span style="font-weight: 600; font-size: 0.85rem;">Active in Navigation</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Create Category</button>
+                </form>
+            </div>
+
+        </div>
+
+    </main>
+</div>
+
+</body>
+</html>

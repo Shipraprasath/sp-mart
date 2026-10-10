@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Order History')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: header-top}"></div>
+<header th:replace="~{fragments/layout :: header}"></header>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<main class="main-content">
+    <div class="container" style="padding-top: 2rem;">
+
+        <div style="display: flex; gap: 2.5rem; align-items: start;">
+
+            <!-- Account Sidebar Nav -->
+            <aside class="card-box" style="width: 250px; flex-shrink: 0;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">My Account</h3>
+                <nav style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem; font-weight: 600;">
+                    <a th:href="@{/account/profile}" style="color: var(--text-muted); padding: 0.4rem 0;">👤 Profile & Security</a>
+                    <a th:href="@{/account/orders}" style="color: var(--secondary); padding: 0.4rem 0;">📦 Order History</a>
+                    <a th:href="@{/account/addresses}" style="color: var(--text-muted); padding: 0.4rem 0;">📍 Saved Addresses</a>
+                    <a th:href="@{/wishlist}" style="color: var(--text-muted); padding: 0.4rem 0;">❤️ My Wishlist</a>
+                    <a th:href="@{/cart}" style="color: var(--text-muted); padding: 0.4rem 0;">🛒 Shopping Cart</a>
+                </nav>
+            </aside>
+
+            <!-- Orders Table -->
+            <div style="flex: 1;">
+                <div style="margin-bottom: 1.5rem;">
+                    <h1 style="font-size: 1.5rem;">Your Orders</h1>
+                    <p style="color: var(--text-muted); font-size: 0.875rem;">View order receipts and track delivery progress</p>
+                </div>
+
+                <div th:if="${orderPage.empty}" class="card-box" style="text-align: center; padding: 4rem 2rem;">
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">You have not placed any orders yet.</p>
+                    <a th:href="@{/products}" class="btn btn-primary">Start Shopping</a>
+                </div>
+
+                <div th:unless="${orderPage.empty}" class="card-box" style="padding: 0; overflow: hidden;">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Order #</th>
+                                    <th>Date</th>
+                                    <th>Items</th>
+                                    <th>Total</th>
+                                    <th>Payment</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="order : ${orderPage.content}">
+                                    <td>
+                                        <a th:href="@{/account/orders/{num}(num=${order.orderNumber})}"
+                                           style="font-weight: 700; color: var(--secondary);"
+                                           th:text="${order.orderNumber}">SPM-123</a>
+                                    </td>
+
+                                    <td th:text="${#temporals.format(order.createdAt, 'dd MMM yyyy, HH:mm')}">Date</td>
+
+                                    <td th:text="${order.totalQuantity} + ' item(s)'">2 items</td>
+
+                                    <td style="font-weight: 700; color: var(--primary);" th:text="'₹' + ${#numbers.formatDecimal(order.finalAmount, 1, 2)}">₹149.00</td>
+
+                                    <td>
+                                        <span th:text="${order.paymentMethod.displayName}">UPI</span><br>
+                                        <span th:if="${order.paymentStatus.name() == 'PAID'}" class="badge badge-success" style="font-size: 0.65rem;">Paid</span>
+                                        <span th:if="${order.paymentStatus.name() == 'PENDING'}" class="badge badge-warning" style="font-size: 0.65rem;">Pending</span>
+                                        <span th:if="${order.paymentStatus.name() == 'REFUNDED'}" class="badge badge-secondary" style="font-size: 0.65rem;">Refunded</span>
+                                        <span th:if="${order.paymentStatus.name() == 'FAILED'}" class="badge badge-danger" style="font-size: 0.65rem;">Failed</span>
+                                    </td>
+
+                                    <td>
+                                        <span th:if="${order.orderStatus.name() == 'DELIVERED'}" class="badge badge-success" th:text="${order.orderStatus.displayName}">Delivered</span>
+                                        <span th:if="${order.orderStatus.name() == 'CANCELLED'}" class="badge badge-danger" th:text="${order.orderStatus.displayName}">Cancelled</span>
+                                        <span th:if="${order.orderStatus.name() == 'SHIPPED' or order.orderStatus.name() == 'OUT_FOR_DELIVERY'}" class="badge badge-primary" th:text="${order.orderStatus.displayName}">Shipped</span>
+                                        <span th:if="${order.orderStatus.name() == 'PLACED' or order.orderStatus.name() == 'CONFIRMED' or order.orderStatus.name() == 'PROCESSING'}" class="badge badge-warning" th:text="${order.orderStatus.displayName}">Processing</span>
+                                    </td>
+
+                                    <td style="text-align: right;">
+                                        <a th:href="@{/account/orders/{num}(num=${order.orderNumber})}" class="btn btn-outline btn-sm">
+                                            View Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div th:if="${orderPage.totalPages > 1}" style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem;">
+                    <a th:if="${orderPage.hasPrevious()}" th:href="@{/account/orders(page=${orderPage.number - 1})}" class="btn btn-outline btn-sm">← Previous</a>
+                    <span style="display: flex; align-items: center; padding: 0 1rem; font-size: 0.85rem;" th:text="'Page ' + ${orderPage.number + 1} + ' of ' + ${orderPage.totalPages}">Page 1</span>
+                    <a th:if="${orderPage.hasNext()}" th:href="@{/account/orders(page=${orderPage.number + 1})}" class="btn btn-outline btn-sm">Next →</a>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

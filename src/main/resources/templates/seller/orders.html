@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/seller-layout :: head('Customer Orders')}"></head>
+<body>
+
+<div class="saas-layout">
+    <div th:replace="~{fragments/seller-layout :: sidebar('orders')}"></div>
+
+    <main class="saas-workspace">
+        <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 1.85rem; color: var(--midnight-navy); margin-bottom: 0.25rem;">Customer Orders</h1>
+            <p style="color: var(--secondary-text); font-size: 0.95rem;">Manage customer purchases, shipment progression, and fulfillment statuses.</p>
+        </div>
+
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div class="card-box">
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Order Number</th>
+                            <th>Date</th>
+                            <th>Recipient Name</th>
+                            <th>Items Count</th>
+                            <th>Total Amount</th>
+                            <th>Payment</th>
+                            <th>Fulfillment Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="order : ${orderPage.content}">
+                            <td><strong th:text="${order.orderNumber}">SPM-XXXX</strong></td>
+                            <td th:text="${#temporals.format(order.createdAt, 'dd MMM yyyy, HH:mm')}">Date</td>
+                            <td th:text="${order.recipientName}">Recipient</td>
+                            <td th:text="${order.totalQuantity} + ' items'">1 item</td>
+                            <td><strong th:text="'₹' + ${#numbers.formatDecimal(order.finalAmount, 1, 'COMMA', 0, 'POINT')}">₹999</strong></td>
+                            <td>
+                                <span class="badge" th:classappend="${order.paymentStatus.name() == 'PAID' ? 'badge-success' : 'badge-warning'}"
+                                      th:text="${order.paymentStatus.name()}">PAID</span>
+                            </td>
+                            <td>
+                                <span class="badge badge-primary" th:text="${order.orderStatus.displayName}">CONFIRMED</span>
+                            </td>
+                            <td>
+                                <a th:href="@{/seller/orders/{num}(num=${order.orderNumber})}" class="btn btn-outline btn-sm">Manage Status</a>
+                            </td>
+                        </tr>
+                        <tr th:if="${orderPage.totalElements == 0}">
+                            <td colspan="8" style="text-align: center; color: var(--secondary-text); padding: 3rem;">
+                                No orders currently associated with your seller account.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div th:if="${orderPage.totalPages > 1}" style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem;">
+                <a th:each="i : ${#numbers.sequence(0, orderPage.totalPages - 1)}"
+                   th:href="@{/seller/orders(page=${i})}"
+                   class="btn btn-sm"
+                   th:classappend="${orderPage.number == i ? 'btn-primary' : 'btn-outline'}"
+                   th:text="${i + 1}">1</a>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/seller-layout :: head('Sales & Reports')}"></head>
+<body>
+
+<div class="saas-layout">
+    <div th:replace="~{fragments/seller-layout :: sidebar('reports')}"></div>
+
+    <main class="saas-workspace">
+        <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 1.85rem; color: var(--midnight-navy); margin-bottom: 0.25rem;">Store Performance & Customer Reviews</h1>
+            <p style="color: var(--secondary-text); font-size: 0.95rem;">Financial metrics and verified buyer ratings for <strong th:text="${profile.storeName}">Apex Tech</strong>.</p>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div>
+                    <span style="font-size: 0.8rem; color: var(--secondary-text); font-weight: 600; text-transform: uppercase;">Total Sales Volume</span>
+                    <strong style="display: block; font-size: 1.6rem; color: var(--primary);" th:text="'₹' + ${#numbers.formatDecimal(metrics.totalRevenue, 1, 'COMMA', 0, 'POINT')}">₹1,24,999</strong>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div>
+                    <span style="font-size: 0.8rem; color: var(--secondary-text); font-weight: 600; text-transform: uppercase;">Overall Feedback Rating</span>
+                    <strong style="display: block; font-size: 1.6rem; color: #F59E0B;" th:text="${metrics.sellerRating} + ' / 5.0 ★'">4.9 ★</strong>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div>
+                    <span style="font-size: 0.8rem; color: var(--secondary-text); font-weight: 600; text-transform: uppercase;">Active Listed Products</span>
+                    <strong style="display: block; font-size: 1.6rem; color: var(--primary);" th:text="${metrics.totalProducts}">12</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-box">
+            <h3 style="font-size: 1.2rem; color: var(--midnight-navy); margin-bottom: 1.25rem;">Customer Product Feedback</h3>
+
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Product</th>
+                            <th>Rating</th>
+                            <th>Review Title</th>
+                            <th>Customer Feedback</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="rev : ${reviews}">
+                            <td th:text="${#temporals.format(rev.createdAt, 'dd MMM yyyy')}">Date</td>
+                            <td><strong th:text="${rev.product.name}">Product</strong></td>
+                            <td>
+                                <span style="color: #F59E0B; font-weight: 700;" th:text="${rev.rating} + ' ★'">5 ★</span>
+                            </td>
+                            <td><strong th:text="${rev.title}">Title</strong></td>
+                            <td style="max-width: 380px; font-size: 0.85rem; color: var(--secondary-text);" th:text="${rev.comment}">Comment</td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(reviews)}">
+                            <td colspan="5" style="text-align: center; color: var(--secondary-text); padding: 3rem;">
+                                No product reviews received yet.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

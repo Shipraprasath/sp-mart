@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin-layout :: admin-head('Manage Customers')}"></head>
+<body>
+
+<div class="admin-layout">
+    <div th:replace="~{fragments/admin-layout :: sidebar('customers')}"></div>
+
+    <main class="admin-main">
+        <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 1.75rem;">Customer Accounts</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">View registered customer profiles and account authorization states</p>
+        </div>
+
+        <div th:if="${successMessage}" class="alert alert-success alert-auto-dismiss">
+            <span th:text="${successMessage}">Success</span>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger">
+            <span th:text="${errorMessage}">Error</span>
+        </div>
+
+        <div class="card-box" style="padding: 0; overflow: hidden;">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Customer Name</th>
+                            <th>Email Address</th>
+                            <th>Mobile Phone</th>
+                            <th>Role</th>
+                            <th>Registration Date</th>
+                            <th>Account Status</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="user : ${customerPage.content}">
+                            <td>
+                                <strong style="color: var(--primary);" th:text="${user.fullName}">Name</strong>
+                            </td>
+                            <td><span th:text="${user.email}">email</span></td>
+                            <td th:text="${user.phone}">Phone</td>
+                            <td>
+                                <span class="badge" th:classappend="${user.role.name() == 'ROLE_ADMIN' ? 'badge-primary' : 'badge-secondary'}"
+                                      th:text="${user.role.name() == 'ROLE_ADMIN' ? 'Admin' : 'Customer'}">Customer</span>
+                            </td>
+                            <td th:text="${#temporals.format(user.createdAt, 'dd MMM yyyy')}">Date</td>
+                            <td>
+                                <span th:if="${user.enabled}" class="badge badge-success">Active</span>
+                                <span th:unless="${user.enabled}" class="badge badge-danger">Disabled</span>
+                            </td>
+                            <td style="text-align: right;">
+                                <form th:if="${user.role.name() != 'ROLE_ADMIN'}" th:action="@{/admin/customers/{id}/toggle(id=${user.id})}" method="post">
+                                    <button type="submit" class="btn btn-sm"
+                                            th:classappend="${user.enabled ? 'btn-outline' : 'btn-primary'}"
+                                            th:text="${user.enabled ? 'Deactivate' : 'Reactivate'}">
+                                        Toggle
+                                    </button>
+                                </form>
+                                <span th:if="${user.role.name() == 'ROLE_ADMIN'}" style="font-size: 0.8rem; color: var(--text-light);">
+                                    Super Admin
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div th:if="${customerPage.totalPages > 1}" style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem;">
+            <a th:if="${customerPage.hasPrevious()}" th:href="@{/admin/customers(page=${customerPage.number - 1})}" class="btn btn-outline btn-sm">← Previous</a>
+            <span style="display: flex; align-items: center; padding: 0 1rem; font-size: 0.85rem;" th:text="'Page ' + ${customerPage.number + 1} + ' of ' + ${customerPage.totalPages}">Page 1</span>
+            <a th:if="${customerPage.hasNext()}" th:href="@{/admin/customers(page=${customerPage.number + 1})}" class="btn btn-outline btn-sm">Next →</a>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

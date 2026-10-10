@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin-layout :: admin-head('Order Details #' + ${order.orderNumber})}"></head>
+<body>
+
+<div class="admin-layout">
+    <div th:replace="~{fragments/admin-layout :: sidebar('orders')}"></div>
+
+    <main class="admin-main">
+        <div style="max-width: 960px;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2rem;">
+                <div>
+                    <a th:href="@{/admin/orders}" style="color: var(--secondary); font-size: 0.85rem; font-weight: 600;">← Back to All Orders</a>
+                    <h1 style="font-size: 1.75rem; margin-top: 0.25rem;">
+                        Order Management <span style="color: var(--secondary);" th:text="'#' + ${order.orderNumber}">#SPM-123</span>
+                    </h1>
+                    <p style="color: var(--text-muted); font-size: 0.85rem;">
+                        Placed by <strong th:text="${order.user.fullName}">Customer</strong> (<span th:text="${order.user.email}">email</span>) on
+                        <span th:text="${#temporals.format(order.createdAt, 'dd MMMM yyyy, HH:mm')}">Date</span>
+                    </p>
+                </div>
+                <div>
+                    <span class="badge" style="font-size: 0.9rem; padding: 0.5rem 1rem;"
+                          th:classappend="${order.orderStatus.name() == 'DELIVERED' ? 'badge-success' : (order.orderStatus.name() == 'CANCELLED' ? 'badge-danger' : 'badge-primary')}"
+                          th:text="${order.orderStatus.displayName}">Status</span>
+                </div>
+            </div>
+
+            <div th:if="${successMessage}" class="alert alert-success alert-auto-dismiss">
+                <span th:text="${successMessage}">Success</span>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger">
+                <span th:text="${errorMessage}">Error</span>
+            </div>
+
+            <!-- Transition Order Status Control Form Box -->
+            <div class="card-box" style="background-color: #f8fafc; border: 2px solid var(--border-color);">
+                <div class="card-box-header">
+                    <h3>Update Order Status & Audit Trail</h3>
+                </div>
+
+                <form th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post">
+                    <div style="display: grid; grid-template-columns: 1fr 2fr auto; gap: 1rem; align-items: end;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Next Order Status</label>
+                            <select name="status" class="form-control" required th:disabled="${order.orderStatus.name() == 'DELIVERED' or order.orderStatus.name() == 'CANCELLED'}">
+                                <option th:each="st : ${allStatuses}"
+                                        th:value="${st}"
+                                        th:text="${st.displayName}"
+                                        th:selected="${order.orderStatus == st}"></option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Internal Audit Comment</label>
+                            <input type="text" name="comment" class="form-control" placeholder="E.g., Dispatched via BlueDart tracking #987654"
+                                   th:disabled="${order.orderStatus.name() == 'DELIVERED' or order.orderStatus.name() == 'CANCELLED'}">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary"
+                                th:disabled="${order.orderStatus.name() == 'DELIVERED' or order.orderStatus.name() == 'CANCELLED'}">
+                            Apply Status Update
+                        </button>
+                    </div>
+
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.75rem;">
+                        * Permitted transitions are strictly validated on server: Placed → Confirmed/Cancelled → Processing/Cancelled → Shipped/Cancelled → Out for Delivery → Delivered. Cancelling an order automatically restores inventory!
+                    </div>
+                </form>
+            </div>
+
+            <!-- Order Items Snapshot Table -->
+            <div class="card-box" style="padding: 0; overflow: hidden; margin-top: 1.5rem;">
+                <div class="card-box-header" style="padding: 1rem 1.25rem; margin-bottom: 0;">
+                    <h3>Purchased Items Snapshot</h3>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>SKU</th>
+                                <th>Unit Price</th>
+                                <th style="text-align: center;">Qty</th>
+                                <th style="text-align: right;">Line Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="item : ${order.items}">
+                                <td>
+                                    <div style="display: flex; gap: 0.75rem; align-items: center;">
+                                        <img th:src="${item.productImageUrl}" th:alt="${item.productName}"
+                                             style="width: 44px; height: 44px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                                        <strong style="color: var(--primary);" th:text="${item.productName}">Product</strong>
+                                    </div>
+                                </td>
+                                <td><code th:text="${item.productSku}">SKU</code></td>
+                                <td th:text="'₹' + ${#numbers.formatDecimal(item.unitPrice, 1, 2)}">₹99.00</td>
+                                <td style="text-align: center; font-weight: 700;" th:text="${item.quantity}">1</td>
+                                <td style="text-align: right; font-weight: 700;" th:text="'₹' + ${#numbers.formatDecimal(item.lineTotal, 1, 2)}">₹99.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="padding: 1.25rem; border-top: 1px solid var(--border-color); background-color: #f8fafc; display: flex; justify-content: flex-end;">
+                    <div style="min-width: 260px; font-size: 0.9rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem;">
+                            <span>Subtotal:</span>
+                            <span th:text="'₹' + ${#numbers.formatDecimal(order.subtotal, 1, 2)}">₹99.00</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem;">
+                            <span>Shipping Fee:</span>
+                            <span th:text="${order.shippingFee == 0 ? 'FREE' : '₹' + #numbers.formatDecimal(order.shippingFee, 1, 2)}">₹0.00</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 1.15rem; color: var(--primary); border-top: 1px dashed var(--border-color); padding-top: 0.5rem; margin-top: 0.5rem;">
+                            <span>Grand Total:</span>
+                            <span th:text="'₹' + ${#numbers.formatDecimal(order.finalAmount, 1, 2)}">₹99.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer & Delivery Snapshot -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                <div class="card-box">
+                    <h4 style="font-size: 0.85rem; text-transform: uppercase; color: var(--text-light); margin-bottom: 0.75rem;">Delivery Address Snapshot</h4>
+                    <strong style="color: var(--primary);" th:text="${order.recipientName}">Recipient</strong>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0.25rem 0;" th:text="${order.deliveryAddressText}">Address</p>
+                    <p style="color: var(--text-muted); font-size: 0.85rem;">Phone: <strong th:text="${order.recipientPhone}">Phone</strong></p>
+                    <p th:if="${order.notes != null and !order.notes.isBlank()}" style="color: var(--info); font-size: 0.8rem; margin-top: 0.5rem;">
+                        <strong>Customer Note:</strong> <span th:text="${order.notes}">Note</span>
+                    </p>
+                </div>
+
+                <div class="card-box">
+                    <h4 style="font-size: 0.85rem; text-transform: uppercase; color: var(--text-light); margin-bottom: 0.75rem;">Payment Transaction</h4>
+                    <p style="font-size: 0.9rem; margin-bottom: 0.25rem;">Method: <strong th:text="${order.paymentMethod.displayName}">UPI</strong></p>
+                    <p style="font-size: 0.9rem; margin-bottom: 0.25rem;">
+                        Status:
+                        <span th:if="${order.paymentStatus.name() == 'PAID'}" class="badge badge-success">Paid</span>
+                        <span th:if="${order.paymentStatus.name() == 'PENDING'}" class="badge badge-warning">Pending</span>
+                        <span th:if="${order.paymentStatus.name() == 'REFUNDED'}" class="badge badge-secondary">Refunded</span>
+                    </p>
+                    <p th:if="${payment != null}" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+                        Txn ID: <code th:text="${payment.transactionReference}">TXN-123</code><br>
+                        Response: <span th:text="${payment.gatewayResponse}">OK</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Activity Audit Trail -->
+            <div class="card-box" style="margin-top: 1.5rem;">
+                <div class="card-box-header">
+                    <h3>Status Audit History</h3>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div th:each="h : ${statusHistory}" style="display: flex; gap: 1rem; font-size: 0.85rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem;">
+                        <span style="min-width: 140px; color: var(--text-light);" th:text="${#temporals.format(h.changedAt, 'dd MMM yyyy, HH:mm')}">Date</span>
+                        <strong style="min-width: 120px;" th:text="${h.status.displayName}">Status</strong>
+                        <span style="flex: 1; color: var(--text-muted);" th:text="${h.comments}">Comment</span>
+                        <span style="color: var(--text-light);" th:text="'By: ' + ${h.changedBy}">By</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+</body>
+</html>
