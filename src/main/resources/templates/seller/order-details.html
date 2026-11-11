@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/seller-layout :: head('Manage Order #' + order.orderNumber)}"></head>
+<body>
+
+<div class="saas-layout">
+    <div th:replace="~{fragments/seller-layout :: sidebar('orders')}"></div>
+
+    <main class="saas-workspace">
+        <div style="margin-bottom: 2rem;">
+            <a th:href="@{/seller/orders}" style="color: var(--secondary-text); font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 0.5rem;">
+                ← Back to All Orders
+            </a>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1 style="font-size: 1.85rem; color: var(--midnight-navy); margin-bottom: 0.25rem;">
+                        Order <span th:text="${order.orderNumber}">SPM-XXXX</span>
+                    </h1>
+                    <p style="color: var(--secondary-text); font-size: 0.9rem;" th:text="'Placed on ' + ${#temporals.format(order.createdAt, 'dd MMMM yyyy, HH:mm')}">Date</p>
+                </div>
+                <div>
+                    <span class="badge badge-primary" style="font-size: 0.9rem;" th:text="${order.orderStatus.displayName}">CONFIRMED</span>
+                </div>
+            </div>
+        </div>
+
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1.1fr; gap: 2rem;">
+            <div>
+                <!-- Line items -->
+                <div class="card-box" style="margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.15rem; margin-bottom: 1.25rem; color: var(--midnight-navy);">Purchased Products</h3>
+
+                    <div th:each="item : ${order.items}" style="display: flex; gap: 1rem; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--border-grey);">
+                        <img th:src="${item.productImageUrl}" th:alt="${item.productName}"
+                             style="width: 56px; height: 56px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border-grey);">
+                        <div style="flex: 1;">
+                            <strong style="color: var(--primary); display: block;" th:text="${item.productName}">Product</strong>
+                            <div style="font-size: 0.8rem; color: var(--secondary-text);">
+                                SKU: <code th:text="${item.productSku}">SKU</code> · Qty: <strong th:text="${item.quantity}">1</strong>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <strong style="color: var(--primary);" th:text="'₹' + ${#numbers.formatDecimal(item.lineTotal, 1, 'COMMA', 0, 'POINT')}">₹19,999</strong>
+                            <span style="display: block; font-size: 0.75rem; color: var(--secondary-text);" th:text="'(₹' + ${#numbers.formatDecimal(item.unitPrice, 1, 'COMMA', 0, 'POINT')} + ' each)'">₹19,999 each</span>
+                        </div>
+                    </div>
+
+                    <div style="max-width: 280px; margin-left: auto; padding-top: 1.25rem; font-size: 0.925rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="color: var(--secondary-text);">Subtotal:</span>
+                            <strong th:text="'₹' + ${#numbers.formatDecimal(order.subtotal, 1, 'COMMA', 0, 'POINT')}">₹19,999</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="color: var(--secondary-text);">Shipping:</span>
+                            <span th:text="${order.shippingFee == 0 ? 'FREE' : '₹' + #numbers.formatDecimal(order.shippingFee, 1, 'COMMA', 0, 'POINT')}">FREE</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 1.15rem; color: var(--midnight-navy); font-weight: 800; border-top: 1px dashed var(--border-grey); padding-top: 0.5rem;">
+                            <span>Total:</span>
+                            <span th:text="'₹' + ${#numbers.formatDecimal(order.finalAmount, 1, 'COMMA', 0, 'POINT')}">₹19,999</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Update Fulfillment Status Form (Section 11) -->
+                <div class="card-box" style="border: 2px solid var(--electric-blue);">
+                    <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--midnight-navy);">Update Fulfillment Milestone</h3>
+                    <p style="font-size: 0.85rem; color: var(--secondary-text); margin-bottom: 1.25rem;">
+                        Advance the customer order status as warehouse processing occurs.
+                    </p>
+
+                    <form th:action="@{/seller/orders/{id}/status(id=${order.id})}" method="post" style="display: flex; gap: 1rem; align-items: flex-end;">
+                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                            <label class="form-label" for="status">Next Allowed Status</label>
+                            <select id="status" name="status" class="form-control" required>
+                                <option value="PROCESSING" th:selected="${order.orderStatus.name() == 'PROCESSING'}">PROCESSING (Packed at Warehouse)</option>
+                                <option value="SHIPPED" th:selected="${order.orderStatus.name() == 'SHIPPED'}">SHIPPED (Handed to Courier Partner)</option>
+                                <option value="OUT_FOR_DELIVERY" th:selected="${order.orderStatus.name() == 'OUT_FOR_DELIVERY'}">OUT_FOR_DELIVERY (Out for Doorstep Delivery)</option>
+                                <option value="DELIVERED" th:selected="${order.orderStatus.name() == 'DELIVERED'}">DELIVERED (Customer Handover Complete)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="height: 44px;">Update Status</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Customer & Delivery sidebar -->
+            <div>
+                <div class="card-box" style="margin-bottom: 1.5rem;">
+                    <h4 style="font-size: 0.85rem; text-transform: uppercase; color: var(--secondary-text); margin-bottom: 0.75rem;">Delivery Destination</h4>
+                    <strong style="color: var(--primary); font-size: 1rem; display: block;" th:text="${order.recipientName}">Recipient Name</strong>
+                    <p style="color: var(--secondary-text); font-size: 0.875rem; margin-bottom: 0.5rem;" th:text="${order.deliveryAddressText}">Address text</p>
+                    <p style="color: var(--secondary-text); font-size: 0.875rem;">Phone: <strong th:text="${order.recipientPhone}">9876543210</strong></p>
+                </div>
+
+                <div class="card-box">
+                    <h4 style="font-size: 0.85rem; text-transform: uppercase; color: var(--secondary-text); margin-bottom: 0.75rem;">Payment Information</h4>
+                    <p style="font-size: 0.875rem; margin-bottom: 0.35rem;">
+                        Method: <strong th:text="${order.paymentMethod.displayName}">UPI</strong>
+                    </p>
+                    <p style="font-size: 0.875rem;">
+                        Status:
+                        <span class="badge" th:classappend="${order.paymentStatus.name() == 'PAID' ? 'badge-success' : 'badge-warning'}"
+                              th:text="${order.paymentStatus.name()}">PAID</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

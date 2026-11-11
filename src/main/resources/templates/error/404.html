@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Page Not Found (404)')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: header-top}"></div>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="main-content">
+    <div class="container" style="max-width: 600px; padding: 5rem 1rem; text-align: center;">
+        <div style="font-size: 5rem; font-weight: 800; color: var(--secondary); line-height: 1;">404</div>
+        <h1 style="font-size: 2rem; margin: 1rem 0 0.5rem 0;">Page or Product Not Found</h1>
+        <p style="color: var(--text-muted); font-size: 1rem; margin-bottom: 2rem;"
+           th:text="${errorMessage != null ? errorMessage : 'The requested item or URL does not exist or has been moved.'}">
+            The requested item or URL does not exist or has been moved.
+        </p>
+        <div style="display: flex; justify-content: center; gap: 1rem;">
+            <a th:href="@{/}" class="btn btn-primary">Return to Homepage</a>
+            <a th:href="@{/products}" class="btn btn-outline">Explore Catalog</a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

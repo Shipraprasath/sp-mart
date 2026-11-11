@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Complete Payment')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: header-top}"></div>
+<header th:replace="~{fragments/layout :: header}"></header>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<main class="main-content">
+    <div class="container" style="max-width: 680px; padding-top: 2.5rem; padding-bottom: 3rem;">
+
+        <div class="card-box" style="border-radius: var(--radius-lg); box-shadow: var(--shadow-md);">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <span class="badge badge-warning" style="margin-bottom: 0.5rem; font-size: 0.8rem;">Payment Authorization Required</span>
+                <h1 style="font-size: 1.85rem; font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: var(--primary);">Complete Your Payment</h1>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">
+                    Order Reference: <strong style="color: var(--secondary);" th:text="${order.orderNumber}">SPM-20261009-XXXX</strong>
+                </p>
+                <div style="font-size: 2.25rem; font-weight: 800; color: var(--secondary); margin-top: 0.5rem;"
+                     th:text="'₹' + ${#numbers.formatDecimal(order.finalAmount, 1, 2)}">
+                    ₹14,999.00
+                </div>
+            </div>
+
+            <!-- UPI / GPAY / PAYTM Payment Option View -->
+            <div th:if="${order.paymentMethod.name() == 'UPI' or order.paymentMethod.name() == 'GPAY' or order.paymentMethod.name() == 'PAYTM'}" style="text-align: center; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+                <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem;" th:text="'Scan & Pay via ' + ${order.paymentMethod.displayName}">Scan & Pay via UPI Apps</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Open Google Pay, PhonePe, Paytm, or BHIM to scan and complete payment</p>
+
+                <!-- Simulated UPI QR Code SVG -->
+                <div style="display: inline-block; padding: 1.25rem; background: white; border: 2px solid var(--border-color); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); margin-bottom: 1.25rem;">
+                    <svg width="180" height="180" viewBox="0 0 100 100">
+                        <rect width="100" height="100" fill="#ffffff" />
+                        <!-- QR Corner 1 -->
+                        <rect x="10" y="10" width="24" height="24" fill="#0B1220" />
+                        <rect x="14" y="14" width="16" height="16" fill="#ffffff" />
+                        <rect x="18" y="18" width="8" height="8" fill="#0B1220" />
+                        <!-- QR Corner 2 -->
+                        <rect x="66" y="10" width="24" height="24" fill="#0B1220" />
+                        <rect x="70" y="14" width="16" height="16" fill="#ffffff" />
+                        <rect x="74" y="18" width="8" height="8" fill="#0B1220" />
+                        <!-- QR Corner 3 -->
+                        <rect x="10" y="66" width="24" height="24" fill="#0B1220" />
+                        <rect x="14" y="70" width="16" height="16" fill="#ffffff" />
+                        <rect x="18" y="74" width="8" height="8" fill="#0B1220" />
+                        <!-- Data Pattern Modules -->
+                        <rect x="42" y="14" width="6" height="10" fill="#0B1220" />
+                        <rect x="52" y="18" width="8" height="6" fill="#0B1220" />
+                        <rect x="40" y="40" width="20" height="20" fill="#287BFF" />
+                        <rect x="45" y="45" width="10" height="10" fill="#ffffff" />
+                        <rect x="14" y="44" width="8" height="8" fill="#0B1220" />
+                        <rect x="26" y="40" width="8" height="12" fill="#0B1220" />
+                        <rect x="66" y="44" width="14" height="6" fill="#0B1220" />
+                        <rect x="74" y="54" width="12" height="10" fill="#0B1220" />
+                        <rect x="42" y="70" width="12" height="12" fill="#0B1220" />
+                        <rect x="62" y="76" width="18" height="10" fill="#0B1220" />
+                    </svg>
+                </div>
+
+                <div style="background-color: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; max-width: 400px; margin-left: auto; margin-right: auto;">
+                    <div style="text-align: left;">
+                        <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Merchant UPI VPA</span>
+                        <code id="merchantUpiVal" style="font-weight: 700; color: var(--primary);" th:text="${merchantUpiId}">spmart.pay@okaxis</code>
+                    </div>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('merchantUpiVal').innerText); alert('UPI VPA copied to clipboard!');">Copy VPA</button>
+                </div>
+            </div>
+
+            <!-- Card Payment Option View -->
+            <div th:if="${order.paymentMethod.name() == 'CARD'}" style="border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+                <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; text-align: center;">Demo Online Card Gateway</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; text-align: center;">
+                    Academic payment sandbox. No real charges will be made.
+                </p>
+
+                <div style="background-color: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label class="form-label">Simulated Card Number</label>
+                        <input type="text" class="form-control" value="•••• •••• •••• 4242" disabled>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Expiry</label>
+                            <input type="text" class="form-control" value="12/28" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">CVV</label>
+                            <input type="text" class="form-control" value="•••" disabled>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Development / Demo Simulation Workflow Box -->
+            <div style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-md); padding: 1.25rem; margin-top: 1.5rem;">
+                <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
+                    <span style="font-weight: 700; color: #92400e; font-size: 0.85rem;">⚡ DEMO PAYMENT SIMULATION GATEWAY</span>
+                </div>
+                <p style="font-size: 0.825rem; color: #78350f; margin-bottom: 1rem;">
+                    As specified in the capstone requirements, this development workflow simulates online gateway webhook responses and server-side verification without falsifying real money transfers.
+                </p>
+
+                <form th:action="@{/checkout/payment/{orderNumber}/process(orderNumber=${order.orderNumber})}" method="post" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <input type="hidden" name="simulatedTxnId" th:value="'TXN-SIM-' + ${#strings.substring(order.orderNumber, 4)}">
+                    
+                    <button type="submit" name="status" value="SUCCESS" class="btn btn-primary" style="flex: 2; padding: 0.75rem;">
+                        ✓ Simulate Successful Payment Verification
+                    </button>
+                    
+                    <button type="submit" name="status" value="FAILED" class="btn btn-outline" style="flex: 1; color: var(--danger); border-color: #fca5a5; padding: 0.75rem;">
+                        ✕ Simulate Payment Failure
+                    </button>
+                </form>
+            </div>
+
+            <div style="text-align: center; margin-top: 1.5rem;">
+                <a th:href="@{/account/orders/{num}(num=${order.orderNumber})}" style="font-size: 0.85rem; color: var(--text-muted);">
+                    View order status without completing payment →
+                </a>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

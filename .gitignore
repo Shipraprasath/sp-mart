@@ -1,0 +1,54 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-userId
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradletask/
+build/
+
+### VS Code ###
+.vscode/
+
+### H2 Database files ###
+/data/
+*.mv.db
+*.trace.db
+
+### Log files ###
+*.log
+
+### Tunnel binary, screenshots, reports, PPT & non-code artifacts ###
+screenshots/
+*.pdf
+*.pptx
+PRESENTATION_SLIDES.html
+PROJECT_PPT.md
+PROJECT_DOCUMENTATION.md
+PROJECT_REPORT.html
+DATABASE.md
+push-to-github.bat
+cloudflared.exe
+build_expanded_report.ps1
+college_logo.jpg
+logo_base64.txt
+output.pdf

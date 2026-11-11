@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/seller-layout :: head(${isEdit ? 'Edit Product' : 'Add New Product'})}"></head>
+<body>
+
+<div class="saas-layout">
+    <div th:replace="~{fragments/seller-layout :: sidebar(${isEdit ? 'products' : 'new-product'})}"></div>
+
+    <main class="saas-workspace">
+        <div style="margin-bottom: 2rem;">
+            <a th:href="@{/seller/products}" style="color: var(--secondary-text); font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 0.5rem;">
+                ← Back to Products List
+            </a>
+            <h1 style="font-size: 1.85rem; color: var(--midnight-navy); margin-bottom: 0.25rem;" th:text="${isEdit ? 'Edit Product: ' + productDto.name : 'List New Electronics Product'}">Add Product</h1>
+            <p style="color: var(--secondary-text); font-size: 0.95rem;">Provide detailed hardware specifications to enable accurate AI comparisons.</p>
+        </div>
+
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div class="card-box" style="max-width: 900px;">
+            <form th:action="${isEdit ? '/seller/products/' + productId + '/edit' : '/seller/products/new'}"
+                  th:object="${productDto}" method="post" data-prevent-double-submit>
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="name">Product Title *</label>
+                        <input type="text" id="name" th:field="*{name}" class="form-control" placeholder="e.g. Apple MacBook Pro 14 M3 Max" required>
+                        <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="form-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="sku">SKU Code *</label>
+                        <input type="text" id="sku" th:field="*{sku}" class="form-control" placeholder="e.g. LP-APL-MBPM3" required>
+                        <span th:if="${#fields.hasErrors('sku')}" th:errors="*{sku}" class="form-error"></span>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="categoryId">Category *</label>
+                        <select id="categoryId" th:field="*{categoryId}" class="form-control" required>
+                            <option value="">Select Category</option>
+                            <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+                        </select>
+                        <span th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}" class="form-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="brand">Brand *</label>
+                        <input type="text" id="brand" th:field="*{brand}" class="form-control" placeholder="e.g. Apple, Samsung, Dell" required>
+                        <span th:if="${#fields.hasErrors('brand')}" th:errors="*{brand}" class="form-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="modelNumber">Model Number</label>
+                        <input type="text" id="modelNumber" th:field="*{modelNumber}" class="form-control" placeholder="e.g. MRX33HN/A">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="price">Original Price (₹) *</label>
+                        <input type="number" step="0.01" id="price" th:field="*{price}" class="form-control" placeholder="e.g. 199900.00" required>
+                        <span th:if="${#fields.hasErrors('price')}" th:errors="*{price}" class="form-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="discountPrice">Discounted Selling Price (₹)</label>
+                        <input type="number" step="0.01" id="discountPrice" th:field="*{discountPrice}" class="form-control" placeholder="e.g. 184900.00">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="stock">Inventory Stock Units *</label>
+                        <input type="number" id="stock" th:field="*{stock}" class="form-control" placeholder="e.g. 25" required>
+                        <span th:if="${#fields.hasErrors('stock')}" th:errors="*{stock}" class="form-error"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="mainImageUrl">Primary Product Image URL *</label>
+                    <input type="url" id="mainImageUrl" th:field="*{mainImageUrl}" class="form-control" placeholder="https://images.unsplash.com/..." required>
+                    <span th:if="${#fields.hasErrors('mainImageUrl')}" th:errors="*{mainImageUrl}" class="form-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="specifications">Detailed Technical Specifications</label>
+                    <textarea id="specifications" th:field="*{specifications}" class="form-control" rows="3" placeholder="RAM: 36GB | Storage: 1TB SSD | Display: 14.2 inch Liquid Retina XDR 120Hz | Battery: 72.4Whr | OS: macOS"></textarea>
+                    <small style="color: var(--secondary-text); font-size: 0.775rem;">Tip: Separate specs with pipe (|) characters so the AI Assistant can parse them for comparisons.</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="description">Detailed Product Description</label>
+                    <textarea id="description" th:field="*{description}" class="form-control" rows="4" placeholder="Enter high-level product description, key highlights, and warranty terms..."></textarea>
+                </div>
+
+                <div style="display: flex; gap: 2rem; align-items: center; margin-bottom: 2rem; padding: 1rem; background-color: var(--soft-bg); border-radius: var(--radius-md);">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" th:field="*{active}">
+                        <strong style="font-size: 0.9rem;">Product Active & Visible in Storefront</strong>
+                    </label>
+
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" th:field="*{featured}">
+                        <strong style="font-size: 0.9rem;">Mark as Featured Product</strong>
+                    </label>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-primary btn-lg" th:text="${isEdit ? 'Save Changes' : 'Publish Product'}">Save</button>
+                    <a th:href="@{/seller/products}" class="btn btn-outline btn-lg">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

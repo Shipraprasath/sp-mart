@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${addressDto.id != null ? 'Edit Address' : 'Add New Address'})}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: header-top}"></div>
+<header th:replace="~{fragments/layout :: header}"></header>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<main class="main-content">
+    <div class="container" style="max-width: 640px; padding-top: 2rem;">
+
+        <div class="card-box">
+            <div class="card-box-header">
+                <h1 style="font-size: 1.5rem;" th:text="${addressDto.id != null ? 'Edit Delivery Address' : 'Add New Delivery Address'}">Delivery Address</h1>
+                <a th:href="@{/account/addresses}" class="btn btn-outline btn-sm">← Back to Addresses</a>
+            </div>
+
+            <form th:action="${addressDto.id != null ? '/account/addresses/edit/' + addressDto.id : '/account/addresses/add'}"
+                  th:object="${addressDto}" method="post">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="recipientName">Recipient Name</label>
+                        <input type="text" id="recipientName" th:field="*{recipientName}" class="form-control" required placeholder="Full Name">
+                        <span class="form-text-error" th:if="${#fields.hasErrors('recipientName')}" th:errors="*{recipientName}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="phone">10-Digit Mobile Phone</label>
+                        <input type="tel" id="phone" th:field="*{phone}" class="form-control" required maxlength="10" placeholder="9876543210">
+                        <span class="form-text-error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="addressLine1">Address Line 1 (Flat, House No, Building, Company)</label>
+                    <input type="text" id="addressLine1" th:field="*{addressLine1}" class="form-control" required placeholder="Flat 402, Skyline Residency">
+                    <span class="form-text-error" th:if="${#fields.hasErrors('addressLine1')}" th:errors="*{addressLine1}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="addressLine2">Address Line 2 (Street, Sector, Area)</label>
+                    <input type="text" id="addressLine2" th:field="*{addressLine2}" class="form-control" placeholder="Outer Ring Road">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="locality">Locality / Neighborhood</label>
+                        <input type="text" id="locality" th:field="*{locality}" class="form-control" required placeholder="Marathahalli">
+                        <span class="form-text-error" th:if="${#fields.hasErrors('locality')}" th:errors="*{locality}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="city">City / District</label>
+                        <input type="text" id="city" th:field="*{city}" class="form-control" required placeholder="Bengaluru">
+                        <span class="form-text-error" th:if="${#fields.hasErrors('city')}" th:errors="*{city}"></span>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="state">State</label>
+                        <input type="text" id="state" th:field="*{state}" class="form-control" required placeholder="Karnataka">
+                        <span class="form-text-error" th:if="${#fields.hasErrors('state')}" th:errors="*{state}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="postalCode">6-Digit PIN Code</label>
+                        <input type="text" id="postalCode" th:field="*{postalCode}" class="form-control" required maxlength="6" placeholder="560037">
+                        <span class="form-text-error" th:if="${#fields.hasErrors('postalCode')}" th:errors="*{postalCode}"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="landmark">Landmark (Optional)</label>
+                    <input type="text" id="landmark" th:field="*{landmark}" class="form-control" placeholder="Near Metro Station">
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem;">
+                    <input type="checkbox" id="isDefault" th:field="*{default}">
+                    <label for="isDefault" style="font-size: 0.9rem; font-weight: 600; cursor: pointer;">Set as my default delivery address</label>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-primary btn-block">Save Address</button>
+                    <a th:href="@{/account/addresses}" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

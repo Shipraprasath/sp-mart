@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Shared product card actions: continuous Add to Cart + direct Buy Now + View Details -->
+<div th:fragment="cardActions(p)" class="card-actions">
+    <form th:action="@{/cart/add}" method="post" class="card-action-form js-cart-form">
+        <input type="hidden" name="productId" th:value="${p.id}">
+        <input type="hidden" name="quantity" value="1">
+        <div class="card-action-buttons">
+            <button type="submit"
+                    class="btn btn-primary btn-sm js-add-to-cart-btn"
+                    th:disabled="${!p.isInStock()}">
+                <span class="js-btn-label" th:text="${p.isInStock() ? '+ Add to Cart' : 'Out of Stock'}">+ Add to Cart</span>
+            </button>
+            <button type="submit"
+                    th:formaction="@{/cart/buy-now}"
+                    class="btn btn-buy-now btn-sm js-buy-now-btn"
+                    th:disabled="${!p.isInStock()}">
+                ⚡ Buy Now
+            </button>
+        </div>
+    </form>
+    <a th:href="@{/products/{id}(id=${p.id})}" class="card-details-link">View Details →</a>
+</div>
+</body>
+</html>

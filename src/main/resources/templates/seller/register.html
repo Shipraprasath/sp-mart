@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Register as Seller')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: announcement-bar}"></div>
+<header th:replace="~{fragments/layout :: header}"></header>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<main class="main-content">
+    <div class="container" style="max-width: 900px; padding-top: 2.5rem;">
+        <div class="card-box" style="padding: 2.5rem;">
+            <div style="text-align: center; margin-bottom: 2.25rem;">
+                <span class="badge badge-cyan" style="margin-bottom: 0.75rem;">SELLER ONBOARDING</span>
+                <h1 style="font-size: 2rem; color: var(--midnight-navy); margin-bottom: 0.5rem;">Grow Your Electronics Business on SP MART</h1>
+                <p style="color: var(--secondary-text); font-size: 0.95rem; max-width: 600px; margin: 0 auto;">
+                    Join India's premier AI-powered electronics marketplace. Reach thousands of verified technology shoppers. All seller applications are verified by administrators.
+                </p>
+            </div>
+
+            <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+                <span th:text="${errorMessage}">Error message</span>
+            </div>
+
+            <form th:action="@{/seller/register}" th:object="${sellerDto}" method="post" data-prevent-double-submit>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="storeName">Store / Business Name *</label>
+                        <input type="text" id="storeName" th:field="*{storeName}" class="form-control" placeholder="e.g. Apex Tech Solutions" required>
+                        <span th:if="${#fields.hasErrors('storeName')}" th:errors="*{storeName}" class="form-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="fullName">Primary Contact Name *</label>
+                        <input type="text" id="fullName" th:field="*{fullName}" class="form-control" placeholder="e.g. Anand Kumar" required>
+                        <span th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" class="form-error"></span>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="email">Business Email *</label>
+                        <input type="email" id="email" th:field="*{email}" class="form-control" placeholder="sales@apextech.com" required>
+                        <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="form-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="phone">Business Contact Phone *</label>
+                        <input type="tel" id="phone" th:field="*{phone}" class="form-control" placeholder="9811223344" required>
+                        <span th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="form-error"></span>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="gstin">GSTIN / Tax ID Number</label>
+                        <input type="text" id="gstin" th:field="*{gstin}" class="form-control" placeholder="29AAAAA0000A1Z5">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="businessAddress">Warehouse / Registered Address</label>
+                        <input type="text" id="businessAddress" th:field="*{businessAddress}" class="form-control" placeholder="Electronic City Phase 1, Bengaluru">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="description">Store Description / Product Categories Sold</label>
+                    <textarea id="description" th:field="*{description}" class="form-control" rows="3" placeholder="Tell us about the electronics products, authorized brands, and warranty coverage your store provides..."></textarea>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="password">Account Password *</label>
+                        <input type="password" id="password" th:field="*{password}" class="form-control" placeholder="Min. 6 characters" required>
+                        <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="form-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="confirmPassword">Confirm Password *</label>
+                        <input type="password" id="confirmPassword" th:field="*{confirmPassword}" class="form-control" placeholder="Confirm password" required>
+                        <span th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}" class="form-error"></span>
+                    </div>
+                </div>
+
+                <div style="background-color: var(--soft-bg); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.75rem; font-size: 0.85rem; color: var(--secondary-text);">
+                    ℹ️ <strong>Note on Administrator Verification:</strong> To protect our buyers against counterfeit electronics, new seller accounts are initially placed in <code>Pending Approval</code> status. Administrators review and approve stores within 24-48 business hours.
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-bottom: 1.5rem;">
+                    Submit Seller Application
+                </button>
+            </form>
+
+            <div style="text-align: center; font-size: 0.9rem; color: var(--secondary-text);">
+                Already have a seller account? <a th:href="@{/login}" style="color: var(--electric-blue); font-weight: 600;">Sign In</a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

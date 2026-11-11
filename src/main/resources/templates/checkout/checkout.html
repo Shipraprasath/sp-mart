@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Checkout')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: header-top}"></div>
+<header th:replace="~{fragments/layout :: header}"></header>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<main class="main-content">
+    <div class="container" style="padding-top: 2rem; max-width: 1140px;">
+
+        <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 2rem; font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: var(--primary);">Almost Yours.</h1>
+            <p style="color: var(--text-muted); font-size: 1rem;">Complete your order to bring home the latest in technology.</p>
+        </div>
+
+        <form th:action="@{/checkout/place-order}" th:object="${checkoutDto}" method="post" data-prevent-double-submit>
+            <input type="hidden" th:field="*{idempotencyKey}">
+
+            <div style="display: grid; grid-template-columns: 1fr 380px; gap: 2.5rem; align-items: start;">
+
+                <!-- Checkout Process Steps -->
+                <div>
+                    <!-- Step 1: Select Delivery Address -->
+                    <div class="card-box" style="margin-bottom: 1.5rem;">
+                        <div class="card-box-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1.25rem;">
+                            <h3>1. Select Delivery Address</h3>
+                            <a th:href="@{/account/addresses/add}" class="btn btn-outline btn-sm">+ Add New Address</a>
+                        </div>
+
+                        <div th:if="${#lists.isEmpty(addresses)}" style="padding: 1.5rem; text-align: center; background-color: #f8fafc; border-radius: var(--radius-md);">
+                            <p style="color: var(--text-muted); margin-bottom: 1rem;">You don't have any saved delivery addresses.</p>
+                            <a th:href="@{/account/addresses/add}" class="btn btn-primary btn-sm">Add Delivery Address to Proceed</a>
+                        </div>
+
+                        <div th:unless="${#lists.isEmpty(addresses)}" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem;">
+                            <label th:each="addr : ${addresses}"
+                                   style="display: block; border: 2px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; cursor: pointer; transition: var(--transition);"
+                                   class="address-card-radio">
+                                <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+                                    <input type="radio" th:field="*{addressId}" th:value="${addr.id}" required style="margin-top: 0.25rem;">
+                                    <div style="font-size: 0.875rem;">
+                                        <div style="font-weight: 700; color: var(--primary); margin-bottom: 0.25rem;">
+                                            <span th:text="${addr.recipientName}">Recipient Name</span>
+                                            <span th:if="${addr.isDefault()}" class="badge badge-success" style="font-size: 0.65rem; margin-left: 0.25rem;">Default</span>
+                                        </div>
+                                        <p style="color: var(--text-muted); margin-bottom: 0.25rem;" th:text="${addr.formattedAddress}">Address line</p>
+                                        <p style="color: var(--text-muted); font-weight: 600;">Phone: <span th:text="${addr.phone}">Phone</span></p>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Select Payment Method -->
+                    <div class="card-box" style="margin-bottom: 1.5rem;">
+                        <div class="card-box-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1.25rem;">
+                            <h3>2. Select Payment Method</h3>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <!-- UPI / QR Code -->
+                            <label style="display: flex; gap: 1rem; align-items: center; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; cursor: pointer; transition: var(--transition);">
+                                <input type="radio" th:field="*{paymentMethod}" value="UPI">
+                                <div>
+                                    <strong style="color: var(--primary); display: block;">UPI (Instant QR & VPA)</strong>
+                                    <span style="font-size: 0.85rem; color: var(--text-muted);">Pay securely using PhonePe, BHIM, or any UPI application.</span>
+                                </div>
+                            </label>
+
+                            <!-- Google Pay -->
+                            <label style="display: flex; gap: 1rem; align-items: center; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; cursor: pointer; transition: var(--transition);">
+                                <input type="radio" th:field="*{paymentMethod}" value="GPAY">
+                                <div>
+                                    <strong style="color: var(--primary); display: block;">Google Pay (GPay)</strong>
+                                    <span style="font-size: 0.85rem; color: var(--text-muted);">Quick checkout with verified Google Pay UPI integration.</span>
+                                </div>
+                            </label>
+
+                            <!-- Paytm -->
+                            <label style="display: flex; gap: 1rem; align-items: center; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; cursor: pointer; transition: var(--transition);">
+                                <input type="radio" th:field="*{paymentMethod}" value="PAYTM">
+                                <div>
+                                    <strong style="color: var(--primary); display: block;">Paytm Wallet & UPI</strong>
+                                    <span style="font-size: 0.85rem; color: var(--text-muted);">Fast checkout via Paytm UPI and wallet balance.</span>
+                                </div>
+                            </label>
+
+                            <!-- Debit / Credit Card -->
+                            <label style="display: flex; gap: 1rem; align-items: center; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; cursor: pointer; transition: var(--transition);">
+                                <input type="radio" th:field="*{paymentMethod}" value="CARD">
+                                <div>
+                                    <strong style="color: var(--primary); display: block;">Debit / Credit Card (Demo Payment Gateway)</strong>
+                                    <span style="font-size: 0.85rem; color: var(--text-muted);">Simulate an online payment gateway transaction with instant sandbox verification.</span>
+                                </div>
+                            </label>
+
+                            <!-- Cash on Delivery -->
+                            <label style="display: flex; gap: 1rem; align-items: center; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; cursor: pointer; transition: var(--transition);">
+                                <input type="radio" th:field="*{paymentMethod}" value="COD" required>
+                                <div>
+                                    <strong style="color: var(--primary); display: block;">Cash on Delivery (COD)</strong>
+                                    <span style="font-size: 0.85rem; color: var(--text-muted);">Pay securely in cash or UPI when your shipment arrives at your doorstep.</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Delivery Notes -->
+                    <div class="card-box">
+                        <div class="card-box-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1.25rem;">
+                            <h3>3. Special Delivery Instructions (Optional)</h3>
+                        </div>
+                        <textarea th:field="*{notes}" rows="2" class="form-control" placeholder="E.g., Please leave with front security or call upon arrival..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Step 4: Order Summary Review -->
+                <div class="card-box" style="position: sticky; top: 100px;">
+                    <h3 style="font-size: 1.25rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+                        Items in Your Order
+                    </h3>
+
+                    <div style="max-height: 240px; overflow-y: auto; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+                        <div th:each="item : ${cart.items}" style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 0.75rem;">
+                            <img th:src="${item.product.mainImageUrl}" th:alt="${item.product.name}"
+                                 style="width: 44px; height: 44px; object-fit: contain; background: #f8fafc; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                            <div style="flex: 1; font-size: 0.85rem;">
+                                <div style="font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 190px;"
+                                     th:text="${item.product.name}">Product Name</div>
+                                <div style="color: var(--text-muted);">
+                                    Qty: <strong th:text="${item.quantity}">1</strong> × ₹<span th:text="${#numbers.formatDecimal(item.unitPrice, 1, 2)}">99.00</span>
+                                </div>
+                            </div>
+                            <strong style="font-size: 0.9rem; color: var(--primary);" th:text="'₹' + ${#numbers.formatDecimal(item.getLineTotal(), 1, 2)}">₹99.00</strong>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; font-size: 0.95rem;">
+                        <span style="color: var(--text-muted);">Subtotal</span>
+                        <strong th:text="'₹' + ${#numbers.formatDecimal(subtotal, 1, 2)}">₹99.00</strong>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; font-size: 0.95rem;">
+                        <span style="color: var(--text-muted);">Delivery</span>
+                        <span>
+                            <span th:if="${shippingFee == 0}" style="color: var(--accent); font-weight: 700;">FREE</span>
+                            <strong th:if="${shippingFee > 0}" th:text="'₹' + ${#numbers.formatDecimal(shippingFee, 1, 2)}">₹50.00</strong>
+                        </span>
+                    </div>
+
+                    <div style="border-top: 1px dashed var(--border-color); padding-top: 1rem; margin-top: 1rem; display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.5rem;">
+                        <span style="font-size: 1.1rem; font-weight: 700; color: var(--primary);">Total to Pay</span>
+                        <span style="font-size: 1.5rem; font-weight: 800; color: var(--secondary);"
+                              th:text="'₹' + ${#numbers.formatDecimal(finalTotal, 1, 2)}">₹149.00</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg btn-block" th:disabled="${#lists.isEmpty(addresses)}">
+                        Confirm & Place Order
+                    </button>
+
+                    <div th:if="${#lists.isEmpty(addresses)}" style="color: var(--danger); font-size: 0.8rem; margin-top: 0.5rem; text-align: center;">
+                        * Please add a delivery address to place your order.
+                    </div>
+
+                    <div style="margin-top: 1rem; font-size: 0.75rem; color: var(--text-muted); text-align: center;">
+                        🔒 Safe and encrypted 256-bit transactional checkout. By placing an order, you agree to SP MART terms.
+                    </div>
+                </div>
+
+            </div>
+        </form>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+</body>
+</html>

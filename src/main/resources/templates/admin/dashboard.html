@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin-layout :: admin-head('Dashboard')}"></head>
+<body>
+
+<div class="admin-layout">
+    <!-- Admin Sidebar Navigation -->
+    <div th:replace="~{fragments/admin-layout :: sidebar('dashboard')}"></div>
+
+    <!-- Main Content Area -->
+    <main class="admin-main">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2rem;">
+            <div>
+                <h1 style="font-size: 1.75rem;">SP-Mart Management Dashboard</h1>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Overview of live catalog metrics, orders, revenue, and inventory alerts</p>
+            </div>
+            <div>
+                <a th:href="@{/admin/products/new}" class="btn btn-primary btn-sm">+ Add New Product</a>
+            </div>
+        </div>
+
+        <!-- Metrics Cards Grid -->
+        <div class="metrics-grid">
+            <!-- Total Revenue -->
+            <div class="metric-card">
+                <div class="metric-icon" style="background-color: #ecfdf5; color: var(--accent);">
+                    💰
+                </div>
+                <div>
+                    <div class="metric-val" th:text="'₹' + ${#numbers.formatDecimal(totalRevenue, 1, 2)}">₹0.00</div>
+                    <div class="metric-label">Qualifying Revenue</div>
+                </div>
+            </div>
+
+            <!-- Total Orders -->
+            <div class="metric-card">
+                <div class="metric-icon" style="background-color: #eff6ff; color: var(--secondary);">
+                    📦
+                </div>
+                <div>
+                    <div class="metric-val" th:text="${totalOrders}">0</div>
+                    <div class="metric-label">Total Orders Placed</div>
+                </div>
+            </div>
+
+            <!-- Pending Orders -->
+            <div class="metric-card">
+                <div class="metric-icon" style="background-color: #fffbeb; color: var(--warning);">
+                    ⏳
+                </div>
+                <div>
+                    <div class="metric-val" th:text="${pendingOrders}">0</div>
+                    <div class="metric-label">Orders In Progress</div>
+                </div>
+            </div>
+
+            <!-- Total Products -->
+            <div class="metric-card">
+                <div class="metric-icon" style="background-color: #f5f3ff; color: #8b5cf6;">
+                    🏷️
+                </div>
+                <div>
+                    <div class="metric-val" th:text="${totalProducts}">32</div>
+                    <div class="metric-label">Catalog Products</div>
+                </div>
+            </div>
+
+            <!-- Low Stock Alert -->
+            <div class="metric-card">
+                <div class="metric-icon" style="background-color: #fef2f2; color: var(--danger);">
+                    ⚠️
+                </div>
+                <div>
+                    <div class="metric-val" th:text="${lowStockCount}">0</div>
+                    <div class="metric-label">Low Stock Alerts</div>
+                </div>
+            </div>
+
+            <!-- Customers -->
+            <div class="metric-card">
+                <div class="metric-icon" style="background-color: #f0fdf4; color: #16a34a;">
+                    👥
+                </div>
+                <div>
+                    <div class="metric-val" th:text="${totalCustomers}">2</div>
+                    <div class="metric-label">Registered Customers</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue Accounting Policy Note -->
+        <div style="background-color: #f8fafc; border-left: 4px solid var(--secondary); padding: 0.85rem 1.25rem; border-radius: var(--radius-sm); font-size: 0.825rem; color: var(--text-muted); margin-bottom: 2rem;">
+            <strong>Accounting Audit Note:</strong> Qualifying revenue includes all successfully settled payments (<span class="badge badge-success" style="font-size: 0.65rem;">PAID</span>) plus completed Cash on Delivery (<span class="badge badge-primary" style="font-size: 0.65rem;">DELIVERED</span>) transactions. Cancelled and refunded orders are strictly excluded.
+        </div>
+
+        <!-- Low Stock Items Warning Table -->
+        <div class="card-box" th:if="${not #lists.isEmpty(lowStockItems)}">
+            <div class="card-box-header">
+                <div>
+                    <h3 style="color: var(--danger);">⚠️ Critical Inventory Alert (Stock ≤ 10 units)</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem;">The following products require restocking</p>
+                </div>
+                <a th:href="@{/admin/inventory(lowStockOnly=true)}" class="btn btn-outline btn-sm">Manage All Stock →</a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>SKU</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Current Stock</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="p : ${lowStockItems}">
+                            <td>
+                                <strong th:text="${p.name}">Product Name</strong>
+                            </td>
+                            <td><code th:text="${p.sku}">SKU</code></td>
+                            <td th:text="${p.category.name}">Category</td>
+                            <td th:text="'₹' + ${#numbers.formatDecimal(p.price, 1, 2)}">₹99.00</td>
+                            <td>
+                                <span class="badge badge-danger" th:text="${p.stock} + ' units left'">5 units</span>
+                            </td>
+                            <td>
+                                <a th:href="@{/admin/products/edit/{id}(id=${p.id})}" class="btn btn-outline btn-sm">Restock</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent Customer Orders -->
+        <div class="card-box">
+            <div class="card-box-header">
+                <h3>Recent Customer Orders</h3>
+                <a th:href="@{/admin/orders}" class="btn btn-outline btn-sm">View All Orders →</a>
+            </div>
+
+            <div th:if="${#lists.isEmpty(recentOrders)}" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                No recent customer orders found.
+            </div>
+
+            <div th:unless="${#lists.isEmpty(recentOrders)}" class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Total Amount</th>
+                            <th>Payment</th>
+                            <th>Order Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="ord : ${recentOrders}">
+                            <td>
+                                <a th:href="@{/admin/orders/{id}(id=${ord.id})}" style="font-weight: 700; color: var(--secondary);" th:text="${ord.orderNumber}">SPM-123</a>
+                            </td>
+                            <td>
+                                <strong th:text="${ord.user.fullName}">Customer Name</strong><br>
+                                <span style="font-size: 0.75rem; color: var(--text-muted);" th:text="${ord.user.email}">email</span>
+                            </td>
+                            <td th:text="${#temporals.format(ord.createdAt, 'dd MMM yyyy, HH:mm')}">Date</td>
+                            <td style="font-weight: 700;" th:text="'₹' + ${#numbers.formatDecimal(ord.finalAmount, 1, 2)}">₹149.00</td>
+                            <td>
+                                <span th:text="${ord.paymentMethod.name()}">COD</span><br>
+                                <span th:if="${ord.paymentStatus.name() == 'PAID'}" class="badge badge-success" style="font-size: 0.65rem;">Paid</span>
+                                <span th:if="${ord.paymentStatus.name() == 'PENDING'}" class="badge badge-warning" style="font-size: 0.65rem;">Pending</span>
+                                <span th:if="${ord.paymentStatus.name() == 'REFUNDED'}" class="badge badge-secondary" style="font-size: 0.65rem;">Refunded</span>
+                            </td>
+                            <td>
+                                <span class="badge" th:classappend="${ord.orderStatus.name() == 'DELIVERED' ? 'badge-success' : (ord.orderStatus.name() == 'CANCELLED' ? 'badge-danger' : 'badge-primary')}"
+                                      th:text="${ord.orderStatus.displayName}">Status</span>
+                            </td>
+                            <td>
+                                <a th:href="@{/admin/orders/{id}(id=${ord.id})}" class="btn btn-outline btn-sm">Inspect</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+</body>
+</html>

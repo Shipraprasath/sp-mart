@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/admin-layout :: admin-head(${productDto.id != null ? 'Edit Product' : 'New Product'})}"></head>
+<body>
+
+<div class="admin-layout">
+    <div th:replace="~{fragments/admin-layout :: sidebar('products')}"></div>
+
+    <main class="admin-main">
+        <div style="max-width: 800px;">
+            <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: baseline;">
+                <div>
+                    <h1 style="font-size: 1.75rem;" th:text="${productDto.id != null ? 'Edit Product' : 'Create New Product'}">Product Form</h1>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Fill in product specifications, inventory, and pricing details</p>
+                </div>
+                <a th:href="@{/admin/products}" class="btn btn-outline btn-sm">← Back to Products</a>
+            </div>
+
+            <div class="card-box">
+                <form th:action="${productDto.id != null ? '/admin/products/edit/' + productDto.id : '/admin/products/new'}"
+                      th:object="${productDto}" method="post">
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+                        <div class="form-group">
+                            <label class="form-label" for="sku">Unique Product SKU</label>
+                            <input type="text" id="sku" th:field="*{sku}" class="form-control" placeholder="E.g., ELEC-APL-PRO14" required>
+                            <span class="form-text-error" th:if="${#fields.hasErrors('sku')}" th:errors="*{sku}"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="brand">Brand</label>
+                            <input type="text" id="brand" th:field="*{brand}" class="form-control" placeholder="E.g., Apple, Sony, Nike" required>
+                            <span class="form-text-error" th:if="${#fields.hasErrors('brand')}" th:errors="*{brand}"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="name">Product Name</label>
+                        <input type="text" id="name" th:field="*{name}" class="form-control" placeholder="Full descriptive product title" required>
+                        <span class="form-text-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="categoryId">Category</label>
+                        <select id="categoryId" th:field="*{categoryId}" class="form-control" required>
+                            <option value="">Select Category</option>
+                            <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+                        </select>
+                        <span class="form-text-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem;">
+                        <div class="form-group">
+                            <label class="form-label" for="price">Regular Price ($)</label>
+                            <input type="number" step="0.01" min="0.01" id="price" th:field="*{price}" class="form-control" required placeholder="99.00">
+                            <span class="form-text-error" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="discountPrice">Discount Price ($)</label>
+                            <input type="number" step="0.01" min="0.00" id="discountPrice" th:field="*{discountPrice}" class="form-control" placeholder="Optional sale price">
+                            <span class="form-text-error" th:if="${#fields.hasErrors('discountPrice')}" th:errors="*{discountPrice}"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="stock">Initial Stock</label>
+                            <input type="number" min="0" id="stock" th:field="*{stock}" class="form-control" required placeholder="10">
+                            <span class="form-text-error" th:if="${#fields.hasErrors('stock')}" th:errors="*{stock}"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="mainImageUrl">Main Image URL</label>
+                        <input type="url" id="mainImageUrl" th:field="*{mainImageUrl}" class="form-control" placeholder="https://..." required>
+                        <span class="form-text-error" th:if="${#fields.hasErrors('mainImageUrl')}" th:errors="*{mainImageUrl}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="description">Detailed Description</label>
+                        <textarea id="description" th:field="*{description}" rows="4" class="form-control" placeholder="Product features, specifications, and warranty details..."></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 2rem; margin: 1.5rem 0;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" th:field="*{active}">
+                            <span style="font-weight: 600; font-size: 0.9rem;">Active (Visible in Catalog)</span>
+                        </label>
+
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" th:field="*{featured}">
+                            <span style="font-weight: 600; font-size: 0.9rem;">Featured on Homepage</span>
+                        </label>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+                        <button type="submit" class="btn btn-primary">Save Product</button>
+                        <a th:href="@{/admin/products}" class="btn btn-outline">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>
